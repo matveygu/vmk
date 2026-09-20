@@ -1,0 +1,23 @@
+{% extends 'admin_base.html' %}
+
+{% block title %}{% if group %}Группа {{ group.number }}{% else %}Добавить группу{% endif %} — Управление порталом{% endblock %}
+
+{% block admin_content %}
+<div class="ds-page-header"><div><span class="ds-eyebrow">Учебные группы</span><h1>{% if group %}Редактирование группы{% else %}Новая группа{% endif %}</h1><p>{% if group %}Номер, факультет и учебный курс.{% else %}Создайте группу для пользователей и расписания.{% endif %}</p></div><a class="ds-btn ds-btn-secondary" href="{% url 'admin_groups' %}"><i class="fas fa-arrow-left" aria-hidden="true"></i> К группам</a></div>
+<div class="ds-card study-editor study-editor-sm">
+  <form method="post" class="study-form-stack" novalidate>
+    {% csrf_token %}
+    {% if form.non_field_errors %}<div class="ds-alert ds-alert-danger" role="alert">{{ form.non_field_errors }}</div>{% endif %}
+    {% for field in form %}
+    <div class="ds-field{% if field.errors %} has-error{% endif %}">
+      <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+      {{ field }}
+      {% if field.help_text %}<span class="ds-field-help" id="{{ field.auto_id }}_helptext">{{ field.help_text }}</span>{% endif %}
+      {% if field.errors %}<div class="ds-field-error" id="{{ field.auto_id }}_error" role="alert">{{ field.errors }}</div>{% endif %}
+    </div>
+    {% endfor %}
+    {% if group %}<div class="ds-alert ds-alert-info"><i class="fas fa-circle-info" aria-hidden="true"></i><div>При смене факультета или курса сведения участников и факультет связанных занятий обновятся автоматически. Состав группы, задания и остальное расписание сохранятся.</div></div>{% endif %}
+    <div class="study-form-actions"><button type="submit" class="ds-btn ds-btn-primary"><i class="fas fa-check" aria-hidden="true"></i> {% if group %}Сохранить изменения{% else %}Добавить группу{% endif %}</button><a href="{% url 'admin_groups' %}" class="ds-btn ds-btn-secondary">Отмена</a></div>
+  </form>
+</div>
+{% endblock %}

@@ -1,0 +1,51 @@
+{% extends 'ds_base.html' %}
+{% load static role_tags %}
+
+{% block title %}Новости и события — Портал ВМК МГУ{% endblock %}
+
+{% block content %}
+<div class="ds-page-header ws-page-header">
+  <div><span class="ds-eyebrow">Жизнь факультета</span><h1>Новости и события</h1><p>Объявления, события факультета и обновления курсов.</p></div>
+  {% if user|has_role:"admin,teacher,media" %}<div class="ds-actions"><a href="{% url 'add_news' %}?next={{ request.get_full_path|urlencode }}" class="ds-btn ds-btn-primary"><i class="fas fa-plus" aria-hidden="true"></i> Добавить новость</a></div>{% endif %}
+</div>
+
+<div class="ws-feed-toolbar"><nav class="ds-segmented ws-feed-tabs" aria-label="Категории новостей">
+  <a class="{% if category == 'all' %}active{% endif %}" href="?category=all" {% if category == 'all' %}aria-current="page"{% endif %}>Все записи</a>
+  <a class="{% if category == 'news' %}active{% endif %}" href="?category=news" {% if category == 'news' %}aria-current="page"{% endif %}>Новости</a>
+  <a class="{% if category == 'announcement' %}active{% endif %}" href="?category=announcement" {% if category == 'announcement' %}aria-current="page"{% endif %}>Объявления</a>
+  <a class="{% if category == 'event' %}active{% endif %}" href="?category=event" {% if category == 'event' %}aria-current="page"{% endif %}>События</a>
+</nav><span class="ws-muted">Сначала новые</span></div>
+
+<div class="ws-news-feed">
+  {% for news in page_obj %}
+  <article class="ds-card ws-news-card">
+    <details class="ws-news-details" {% if forloop.first %}open{% endif %}>
+      <summary>
+        <span class="ws-meta-row"><span class="ds-cat-badge ds-cat-{{ news.category }}">{{ news.get_category_display }}</span><time datetime="{{ news.created_at|date:'c' }}">{{ news.created_at|date:"j E Y" }} · {{ news.created_at|date:"H:i" }}</time></span>
+        <span class="ws-news-title">{{ news.title }}</span>
+        <span class="ws-news-excerpt">{{ news.content|truncatechars:180 }}</span>
+        <span class="ws-read-link"><span class="ws-read-closed">Читать полностью</span><span class="ws-read-open">Свернуть запись</span><i class="fas fa-chevron-down" aria-hidden="true"></i></span>
+      </summary>
+      <div class="ws-news-content">{{ news.content|linebreaksbr }}</div>
+    </details>
+    <div class="ws-feed-footer"><span><i class="far fa-user" aria-hidden="true"></i> {{ news.author.name|default:"Автор не указан" }}</span><div class="ws-inline-actions">
+      {% if news.file %}<a class="ds-news-file-chip" href="{{ news.file.url }}" target="_blank" rel="noopener"><i class="fas fa-paperclip" aria-hidden="true"></i> Вложение</a>{% endif %}
+      {% if user == news.author or user.role == 'admin' %}
+      <a href="{% url 'edit_news' news.id %}?next={{ request.get_full_path|urlencode }}" class="ds-icon-btn" title="Редактировать новость" aria-label="Редактировать новость"><i class="fas fa-pen" aria-hidden="true"></i></a>
+      <form method="post" action="{% url 'delete_news' news.id %}" onsubmit="return confirm('Удалить новость?')">{% csrf_token %}<input type="hidden" name="next" value="{{ request.get_full_path }}"><button type="submit" class="ds-icon-btn danger" title="Удалить новость" aria-label="Удалить новость"><i class="fas fa-trash" aria-hidden="true"></i></button></form>
+      {% endif %}
+    </div></div>
+  </article>
+  {% empty %}
+  <div class="ds-card"><div class="ds-empty ws-empty"><span class="ws-empty-icon"><i class="far fa-newspaper" aria-hidden="true"></i></span><span class="ds-empty-title">Здесь пока нет записей</span><span class="ds-empty-desc">Опубликованные записи появятся в этой ленте.</span>{% if category != 'all' %}<a href="?category=all" class="ds-btn ds-btn-secondary ds-btn-sm">Все категории</a>{% endif %}</div></div>
+  {% endfor %}
+
+  {% if page_obj.has_other_pages %}
+  <nav class="ds-pagination" aria-label="Страницы новостей">
+    {% if page_obj.has_previous %}<a href="?category={{ category }}&page={{ page_obj.previous_page_number }}" aria-label="Предыдущая страница"><i class="fas fa-chevron-left fa-xs" aria-hidden="true"></i></a>{% endif %}
+    {% for num in page_obj.paginator.page_range %}{% if page_obj.number == num %}<span class="active" aria-current="page">{{ num }}</span>{% else %}<a href="?category={{ category }}&page={{ num }}">{{ num }}</a>{% endif %}{% endfor %}
+    {% if page_obj.has_next %}<a href="?category={{ category }}&page={{ page_obj.next_page_number }}" aria-label="Следующая страница"><i class="fas fa-chevron-right fa-xs" aria-hidden="true"></i></a>{% endif %}
+  </nav>
+  {% endif %}
+</div>
+{% endblock %}

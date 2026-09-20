@@ -1,0 +1,60 @@
+{% extends 'ds_bare_base.html' %}
+{% load static %}
+{% block title %}Вход — Учебный портал ВМК МГУ{% endblock %}
+{% block extra_css %}<link href="{% static 'css/ds/auth.css' %}?v=20260912-3" rel="stylesheet">{% endblock %}
+{% block content %}
+<div class="ds-auth-layout">
+  {% include 'partials/ds_auth_story.html' %}
+  <main class="ds-auth-main">
+    <div class="ds-auth-utilities">
+      <a href="{% url 'home' %}" class="ds-auth-back"><i class="fas fa-arrow-left" aria-hidden="true"></i> На главную</a>
+      <button type="button" class="ds-theme-toggle" onclick="dsToggleTheme()" aria-label="Переключить тему"><i class="fas fa-sun ds-theme-icon-sun" aria-hidden="true"></i><i class="fas fa-moon ds-theme-icon-moon" aria-hidden="true"></i></button>
+    </div>
+    <div class="ds-auth-card">
+      <div class="ds-auth-head">
+        <span class="ds-eyebrow">Личный кабинет</span>
+        <h1>С возвращением</h1>
+        <p>Всё для учёбы — в одном месте.</p>
+      </div>
+      {% if form.errors %}
+      <div class="ds-alert ds-alert-error" role="alert"><i class="fas fa-circle-exclamation" aria-hidden="true"></i> Неверный номер студенческого или пароль.</div>
+      {% endif %}
+      {% include 'registration/messages.html' %}
+      <form method="post" class="ds-auth-fields">
+        {% csrf_token %}
+        <div class="ds-field">
+          <label for="id_username">Номер студенческого</label>
+          <div class="ds-input-wrap">
+            <i class="fas fa-id-card leading" aria-hidden="true"></i>
+            <input type="text" name="username" class="ds-input with-icon" id="id_username" value="{{ form.username.value|default:'' }}" placeholder="Номер студенческого" required autocomplete="username"{% if form.errors %} aria-invalid="true"{% endif %}>
+          </div>
+        </div>
+        <div class="ds-field">
+          <label for="id_password">Пароль</label>
+          <div class="ds-input-wrap">
+            <i class="fas fa-lock leading" aria-hidden="true"></i>
+            <input type="password" name="password" class="ds-input with-icon with-trailing" id="id_password" placeholder="Введите пароль" required autocomplete="current-password">
+            <button type="button" class="ds-icon-btn ds-input-trailing" id="dsPwToggle" aria-label="Показать пароль" aria-pressed="false"><i class="fas fa-eye" aria-hidden="true"></i></button>
+          </div>
+        </div>
+        <button type="submit" class="ds-btn ds-btn-primary ds-btn-lg ds-btn-full">Войти в кабинет <i class="fas fa-arrow-right" aria-hidden="true"></i></button>
+      </form>
+      <p class="ds-auth-hint"><a href="{% url 'password_reset' %}">Забыли пароль?</a></p>
+      <div class="ds-auth-footer">Впервые здесь? <a href="{% url 'register' %}">Создать аккаунт</a></div>
+    </div>
+    <span class="ds-auth-caption">Учебный портал · Студенческий проект ВМК МГУ</span>
+  </main>
+</div>
+{% endblock %}
+{% block extra_js %}
+<script>
+document.getElementById('dsPwToggle').addEventListener('click', function () {
+  var input = document.getElementById('id_password');
+  var show = input.type === 'password';
+  input.type = show ? 'text' : 'password';
+  this.setAttribute('aria-pressed', String(show));
+  this.setAttribute('aria-label', show ? 'Скрыть пароль' : 'Показать пароль');
+  this.querySelector('i').className = show ? 'fas fa-eye-slash' : 'fas fa-eye';
+});
+</script>
+{% endblock %}

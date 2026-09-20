@@ -1,0 +1,108 @@
+{% extends 'ds_base.html' %}
+{% load static role_tags %}
+
+{% block title %}Мой день — Портал ВМК МГУ{% endblock %}
+
+{% block content %}
+<div class="ds-page-header ws-page-header">
+  <div>
+    <span class="ds-eyebrow">Личный кабинет</span>
+    <h1>Здравствуйте, {{ user.name|default:user.student_id }}</h1>
+    <p>Всё для учёбы — в одном месте.</p>
+  </div>
+  <time class="ws-date-pill" datetime="{{ today|date:'Y-m-d' }}"><i class="far fa-calendar" aria-hidden="true"></i> {{ today|date:"j E, l" }}</time>
+</div>
+
+<nav class="ws-shortcuts" aria-label="Быстрые переходы">
+  <a class="ws-shortcut" href="{% url 'schedule' %}"><span class="ws-shortcut-icon"><i class="far fa-calendar-days" aria-hidden="true"></i></span><span><strong>Расписание</strong><small>План на день и неделю</small></span><i class="fas fa-arrow-right ws-shortcut-arrow" aria-hidden="true"></i></a>
+  <a class="ws-shortcut" href="{% url 'homework_list' %}"><span class="ws-shortcut-icon"><i class="fas fa-list-check" aria-hidden="true"></i></span><span><strong>Задания</strong><small>Сроки и вложения</small></span><i class="fas fa-arrow-right ws-shortcut-arrow" aria-hidden="true"></i></a>
+  <a class="ws-shortcut" href="{% url 'materials_drive_root' %}"><span class="ws-shortcut-icon"><i class="far fa-folder-open" aria-hidden="true"></i></span><span><strong>Материалы</strong><small>Файлы для занятий</small></span><i class="fas fa-arrow-right ws-shortcut-arrow" aria-hidden="true"></i></a>
+</nav>
+
+<div class="ws-dashboard">
+  <div class="ws-stack">
+    <section class="ds-card ds-card-flush ws-day-card" aria-labelledby="wsDayTitle">
+      <div class="ds-card-head ws-section-head">
+        <div><span class="ws-section-kicker">Учебный день</span><h2 id="wsDayTitle">{% if flag %}Завтра в расписании{% else %}Сегодня в расписании{% endif %}</h2></div>
+        <a href="{% url 'schedule' %}" class="ws-text-link">Вся неделя <i class="fas fa-arrow-right" aria-hidden="true"></i></a>
+      </div>
+      {% if today_schedule %}
+      <div class="ws-lessons">
+        {% for lesson in today_schedule %}
+        <article class="ws-lesson">
+          <div class="ws-lesson-clock"><strong>{{ lesson.time }}</strong>{% if lesson.time_end %}<span>{{ lesson.time_end }}</span>{% endif %}</div>
+          <div class="ws-lesson-content">
+            <div class="ws-lesson-topline"><span>{{ lesson.lesson_number }} пара</span>{% if lesson.week_parity != "all" %}<span>{{ lesson.get_week_parity_display }}</span>{% endif %}</div>
+            <h3>{{ lesson.subject.name }}</h3>
+            <div class="ws-lesson-details"><span>{{ lesson.first_teacher_name|default:"Преподаватель не указан" }}</span>{% if lesson.classroom %}<span><i class="fas fa-location-dot" aria-hidden="true"></i> {{ lesson.classroom }}{% if lesson.another_classroom %} / {{ lesson.another_classroom }}{% endif %}</span>{% endif %}</div>
+            {% if lesson.today_homework %}
+            <details class="ws-lesson-homework">
+              <summary><i class="fas fa-paperclip" aria-hidden="true"></i> Домашнее задание <i class="fas fa-chevron-down" aria-hidden="true"></i></summary>
+              <div class="ws-homework-content">{{ lesson.today_homework.content|linebreaksbr }}</div>
+              <div class="ws-meta-row">{% if lesson.today_homework.due_date %}<span>До {{ lesson.today_homework.due_date|date:"j E" }}</span>{% endif %}{% if lesson.today_homework.file %}<a class="ds-news-file-chip" href="{{ lesson.today_homework.file.url }}"><i class="fas fa-paperclip" aria-hidden="true"></i> Файл задания</a>{% endif %}</div>
+            </details>
+            {% endif %}
+          </div>
+        </article>
+        {% endfor %}
+      </div>
+      {% else %}
+      <div class="ds-empty ws-empty">
+        <span class="ws-empty-icon"><i class="far fa-calendar-check" aria-hidden="true"></i></span>
+        <span class="ds-empty-title">{% if not user.group and user.role != 'teacher' %}Группа пока не указана{% else %}Свободный день{% endif %}</span>
+        <span class="ds-empty-desc">{% if not user.group and user.role != 'teacher' %}Данные вашей группы можно посмотреть в профиле.{% else %}На этот день занятий в расписании нет. Можно заглянуть в планы на неделю.{% endif %}</span>
+        <a href="{% url 'schedule' %}" class="ds-btn ds-btn-secondary ds-btn-sm">Открыть расписание</a>
+      </div>
+      {% endif %}
+      <div class="ws-card-foot"><i class="fas fa-circle-info" aria-hidden="true"></i><span>{% if user.role == 'teacher' %}Ваши занятия{% elif user.group %}Группа {{ user.group.number }}{% else %}Личное расписание{% endif %} · {% if flag %}после 18:00 показываем следующий день{% else %}полное расписание доступно в разделе «Расписание»{% endif %}</span></div>
+    </section>
+
+    <section class="ds-card ds-card-flush" aria-labelledby="wsNewsTitle">
+      <div class="ds-card-head ws-section-head"><div><span class="ws-section-kicker">В курсе событий</span><h2 id="wsNewsTitle">Лента факультета</h2></div><a href="{% url 'news_list' %}" class="ws-text-link">Все записи <i class="fas fa-arrow-right" aria-hidden="true"></i></a></div>
+      <div class="ws-home-feed">
+        {% for news in latest_news %}
+        <article class="ws-feed-item">
+          <details class="ws-news-details">
+            <summary>
+              <span class="ws-meta-row"><span class="ds-cat-badge ds-cat-{{ news.category }}">{{ news.get_category_display }}</span><time datetime="{{ news.created_at|date:'c' }}">{{ news.created_at|date:"j E" }}</time></span>
+              <span class="ws-news-title">{{ news.title }}</span>
+              <span class="ws-news-excerpt">{{ news.content|truncatechars:150 }}</span>
+              <span class="ws-read-link"><span class="ws-read-closed">Читать запись</span><span class="ws-read-open">Свернуть</span><i class="fas fa-chevron-down" aria-hidden="true"></i></span>
+            </summary>
+            <div class="ws-news-content">{{ news.content|linebreaksbr }}</div>
+          </details>
+          <div class="ws-feed-footer"><span>{{ news.author.name|default:"Автор не указан" }}</span><div class="ws-inline-actions">
+            {% if news.file %}<a class="ds-news-file-chip" href="{{ news.file.url }}" target="_blank" rel="noopener"><i class="fas fa-paperclip" aria-hidden="true"></i> Вложение</a>{% endif %}
+            {% if user == news.author or user.role == 'admin' %}
+            <a href="{% url 'edit_news' news.id %}" class="ds-icon-btn" title="Редактировать новость" aria-label="Редактировать новость"><i class="fas fa-pen" aria-hidden="true"></i></a>
+            <form method="post" action="{% url 'delete_news' news.id %}" onsubmit="return confirm('Удалить новость?')">{% csrf_token %}<input type="hidden" name="next" value="{% url 'home' %}"><button type="submit" class="ds-icon-btn danger" title="Удалить новость" aria-label="Удалить новость"><i class="fas fa-trash" aria-hidden="true"></i></button></form>
+            {% endif %}
+          </div></div>
+        </article>
+        {% empty %}
+        <div class="ds-empty ws-empty"><span class="ws-empty-icon"><i class="far fa-newspaper" aria-hidden="true"></i></span><span class="ds-empty-title">Новых записей пока нет</span><span class="ds-empty-desc">Здесь появятся объявления, новости и события факультета.</span>{% if user|has_role:"admin,teacher,media" %}<a href="{% url 'add_news' %}" class="ds-btn ds-btn-primary ds-btn-sm">Добавить новость</a>{% endif %}</div>
+        {% endfor %}
+      </div>
+    </section>
+  </div>
+
+  <aside class="ws-stack" aria-label="Ваш профиль и полезные ссылки">
+    <section class="ds-card ws-identity-card">
+      <span class="ws-section-kicker">Ваш профиль</span>
+      <div class="ws-identity-person">{% if user.photo %}<img src="{{ user.photo.url }}" class="ws-person-avatar" alt="">{% else %}<span class="ws-person-avatar" aria-hidden="true">{{ user.name|default:user.student_id|slice:":1"|upper }}</span>{% endif %}<div><strong>{{ user.name|default:user.student_id }}</strong><span class="ds-role-badge ds-role-{{ user.role }}">{{ user.get_role_display }}</span></div></div>
+      <dl class="ws-identity-fields"><div><dt>Факультет</dt><dd>{{ user.faculty|default:"Не указан" }}</dd></div>{% if user.group %}<div><dt>Группа</dt><dd>{{ user.group.number }}{% if user.course %} · {{ user.course }} курс{% endif %}</dd></div>{% endif %}</dl>
+      <a href="{% url 'profile' %}" class="ws-text-link">Открыть профиль <i class="fas fa-arrow-right" aria-hidden="true"></i></a>
+    </section>
+
+    <section class="ds-card ds-card-flush">
+      <div class="ds-card-head ws-section-head"><h2>Ресурсы университета</h2></div>
+      <div class="ws-resource-list">
+        <a href="https://cs.msu.ru/" target="_blank" rel="noopener"><span class="ws-resource-icon"><i class="fas fa-graduation-cap" aria-hidden="true"></i></span><span><strong>Факультет ВМК</strong><small>Официальный сайт</small></span><i class="fas fa-arrow-up-right-from-square" aria-hidden="true"></i></a>
+        <a href="https://www.msu.ru/" target="_blank" rel="noopener"><span class="ws-resource-icon"><i class="fas fa-building-columns" aria-hidden="true"></i></span><span><strong>Московский университет</strong><small>Информация и события МГУ</small></span><i class="fas fa-arrow-up-right-from-square" aria-hidden="true"></i></a>
+        <a href="https://nbmgu.ru/" target="_blank" rel="noopener"><span class="ws-resource-icon"><i class="fas fa-book-open" aria-hidden="true"></i></span><span><strong>Научная библиотека</strong><small>Каталоги и электронные ресурсы</small></span><i class="fas fa-arrow-up-right-from-square" aria-hidden="true"></i></a>
+      </div>
+    </section>
+    <div class="ws-campus-note"><span class="ws-section-kicker">ВМК МГУ</span><p>Факультет вычислительной математики и кибернетики</p><span>Математика. Информатика. Исследования.</span></div>
+  </aside>
+</div>
+{% endblock %}

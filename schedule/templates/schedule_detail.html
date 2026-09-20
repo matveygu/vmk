@@ -1,0 +1,36 @@
+{% extends "ds_base.html" %}
+{% load role_tags %}
+
+{% block title %}{{ schedule.subject }} — Учебный портал МГУ{% endblock %}
+
+{% block content %}
+<div class="ds-page-header">
+  <div>
+    <span class="ds-eyebrow">Расписание</span>
+    <h1>{{ schedule.subject }}</h1>
+    <p>{{ schedule.group }} · ауд. {{ schedule.classroom }}{% if schedule.week_parity != "all" %} · {{ schedule.get_week_parity_display }}{% endif %}</p>
+  </div>
+  {% if user|has_role:"headman,teacher,admin" %}
+  <div class="ds-actions">
+    <a href="{% url 'add_homework' schedule.id %}" class="ds-btn ds-btn-primary"><i class="fas fa-plus"></i> Добавить ДЗ</a>
+  </div>
+  {% endif %}
+</div>
+
+<div class="ds-card ds-card-flush">
+  <div class="ds-card-head"><h3><i class="fas fa-paperclip"></i> Домашние задания</h3></div>
+  <div class="ds-card-body study-homework-list">
+    {% for hw in homeworks %}
+    <div class="ds-news-card">
+      <div class="ds-news-body">{{ hw.content }}</div>
+      <div class="ds-news-meta">
+        <span>Задано {{ hw.assigned_date|date:"d.m.Y" }}{% if hw.due_date %} · сдать до {{ hw.due_date|date:"d.m.Y" }}{% endif %}</span>
+        {% if hw.file %}<a class="ds-news-file-chip" href="{{ hw.file.url }}" target="_blank"><i class="fas fa-paperclip"></i> Файл</a>{% endif %}
+      </div>
+    </div>
+    {% empty %}
+    <div class="ds-empty compact"><i class="fas fa-book-open" aria-hidden="true"></i><span class="ds-empty-title">Заданий пока нет</span><span class="ds-empty-desc">Добавленные задания появятся здесь.</span><a class="ds-btn ds-btn-secondary" href="{% url 'schedule' %}">К расписанию</a></div>
+    {% endfor %}
+  </div>
+</div>
+{% endblock %}

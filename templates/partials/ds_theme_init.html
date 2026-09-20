@@ -1,0 +1,11 @@
+<script>
+(function () {
+  var theme = 'light';
+  try {
+    var saved = localStorage.getItem('msu_theme');
+    if (saved === 'dark' || saved === 'light') theme = saved;
+    else if (window.matchMedia('(prefers-color-scheme: dark)').matches) theme = 'dark';
+  } catch (e) {}
+  document.documentElement.setAttribute('data-theme', theme);
+})();
+</script>

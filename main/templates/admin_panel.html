@@ -1,0 +1,20 @@
+{% extends 'admin_base.html' %}
+{% block title %}Администрирование — Портал ВМК МГУ{% endblock %}
+{% block admin_content %}
+<div class="ds-page-header adm-hub-heading"><div><span class="ds-eyebrow">Управление порталом</span><h1>Что будем редактировать?</h1><p>Выберите раздел. Все изменения сохраняются в общей базе портала.</p></div></div>
+<div class="adm-hub-grid">
+  <a href="{% url 'admin_users' %}" class="ds-card adm-hub-card">
+    <span class="adm-hub-icon"><i class="fas fa-users" aria-hidden="true"></i></span><span class="adm-hub-count">Записей: {{ stats.users }}</span>
+    <h2>Пользователи</h2><p>Учётные записи, роли и доступ. Фильтры по каждому столбцу.</p><span class="adm-hub-open">Открыть раздел <i class="fas fa-arrow-right" aria-hidden="true"></i></span>
+  </a>
+  <a href="{% url 'admin_groups' %}" class="ds-card adm-hub-card">
+    <span class="adm-hub-icon"><i class="fas fa-layer-group" aria-hidden="true"></i></span><span class="adm-hub-count">Записей: {{ stats.groups }}</span>
+    <h2>Группы</h2><p>Учебные группы, факультеты и курсы. Создание и изменение групп.</p><span class="adm-hub-open">Открыть раздел <i class="fas fa-arrow-right" aria-hidden="true"></i></span>
+  </a>
+  <a href="{% url 'admin_schedule' %}" class="ds-card adm-hub-card">
+    <span class="adm-hub-icon"><i class="fas fa-calendar-days" aria-hidden="true"></i></span><span class="adm-hub-count">Занятий: {{ stats.schedule }}</span>
+    <h2>Расписание</h2><p>Занятия по группам и дням недели. Предметы, время и аудитории.</p><span class="adm-hub-open">Открыть раздел <i class="fas fa-arrow-right" aria-hidden="true"></i></span>
+  </a>
+</div>
+<div class="adm-hub-note"><i class="fas fa-shield-halved" aria-hidden="true"></i><p>Раздел доступен только администраторам. Обычные пользователи видят опубликованное расписание без инструментов редактирования.</p></div>
+{% endblock %}

@@ -1,0 +1,81 @@
+{% extends 'ds_base.html' %}
+{% load static %}
+
+{% block title %}Расписание — Учебный портал МГУ{% endblock %}
+
+{% block content %}
+<div class="ds-page-header">
+  <div>
+    <span class="ds-eyebrow">Учебный процесс</span>
+    <h1>Расписание занятий</h1>
+    <p>Лекции и семинары факультета ВМК. Вход в личный кабинет не требуется.</p>
+  </div>
+</div>
+
+<section class="ds-card study-calendar" aria-label="Навигация по расписанию">
+  <div class="study-calendar-heading">
+    <div>
+      <span class="study-caption">Группа</span>
+      <form method="get" class="study-inline-form">
+        {{ form.group }}
+        {{ form.day.as_hidden }}
+        <input type="hidden" name="parity" value="{{ current_parity }}">
+        <noscript><button type="submit" class="ds-btn ds-btn-secondary">Показать</button></noscript>
+      </form>
+    </div>
+  </div>
+
+  <nav class="ds-day-tabs study-day-tabs" aria-label="Дни недели">
+    {% for value, short in week_days %}
+    <a class="ds-day-tab{% if value == current_day %} active{% endif %}" {% if value == current_day %}aria-current="date"{% endif %} href="?group={{ group.pk|default:'' }}&day={{ value }}&parity={{ current_parity }}">
+      <span class="name">{{ short }}</span>
+    </a>
+    {% endfor %}
+  </nav>
+
+  <div class="study-calendar-filters">
+    <span class="study-caption">Чётность недели</span>
+    <div class="ds-segmented" aria-label="Чётность недели">
+      <a class="{% if current_parity == 'all' %}active{% endif %}" href="?group={{ group.pk|default:'' }}&day={{ current_day }}&parity=all">Все</a>
+      <a class="{% if current_parity == 'odd' %}active{% endif %}" href="?group={{ group.pk|default:'' }}&day={{ current_day }}&parity=odd">Нечётная</a>
+      <a class="{% if current_parity == 'even' %}active{% endif %}" href="?group={{ group.pk|default:'' }}&day={{ current_day }}&parity=even">Чётная</a>
+    </div>
+  </div>
+</section>
+
+{% if not group %}
+<div class="ds-card">
+  <div class="ds-empty">
+    <i class="fas fa-users" aria-hidden="true"></i>
+    <span class="ds-empty-title">Выберите группу</span>
+    <span class="ds-empty-desc">Расписание появится после выбора группы выше.</span>
+  </div>
+</div>
+{% else %}
+<section class="ds-card ds-card-flush study-day-schedule">
+  <div class="study-section-heading"><h2>{{ current_day }} <span>Группа {{ group.number }}</span></h2>{% if schedule %}<span class="study-caption">Занятий: {{ schedule|length }}</span>{% endif %}</div>
+  {% for lesson in schedule %}
+  <article class="study-lesson-entry">
+    <div class="ds-lesson-row study-lesson{% if forloop.last %} no-border{% endif %}">
+      <div class="study-lesson-slot"><span class="ds-lesson-num">{{ lesson.lesson_number }}</span>
+      <span class="ds-lesson-time">{{ lesson.time }}{% if lesson.time_end %}<span>{{ lesson.time_end }}</span>{% endif %}</span></div>
+      <div class="ds-lesson-main">
+        <div class="ds-lesson-subject">{{ lesson.subject.name }}</div>
+        <div class="ds-lesson-meta">
+          {{ lesson.first_teacher_name|default:"—" }}{% if lesson.second_teacher_id %} / {{ lesson.second_teacher_name }}{% endif %}
+          {% if lesson.week_parity != "all" %}<span class="study-parity">{{ lesson.get_week_parity_display }}</span>{% endif %}
+        </div>
+      </div>
+      <span class="ds-lesson-room"><i class="fas fa-location-dot" aria-hidden="true"></i> {{ lesson.classroom|default:"—" }}{% if lesson.another_classroom %} / {{ lesson.another_classroom }}{% endif %}</span>
+    </div>
+  </article>
+  {% empty %}
+  <div class="ds-empty">
+    <i class="fas fa-calendar-check" aria-hidden="true"></i>
+    <span class="ds-empty-title">На этот день занятий нет</span>
+    <span class="ds-empty-desc">Выберите другой день недели или измените фильтр чётности.</span>
+  </div>
+  {% endfor %}
+</section>
+{% endif %}
+{% endblock %}

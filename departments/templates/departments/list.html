@@ -1,0 +1,45 @@
+{% extends 'ds_base.html' %}
+
+{% block title %}Кафедры — ВМК МГУ{% endblock %}
+
+{% block content %}
+<div class="pub-page pub-departments">
+  <header class="pub-page-heading">
+    <div><span class="pub-kicker">Структура факультета</span><h1>Найдите своё направление</h1><p>Кафедры ВМК: научные интересы, преподаватели и возможности для обучения.</p></div>
+    <a class="ds-btn ds-btn-secondary" href="https://cs.msu.ru/departments" target="_blank" rel="noopener">На сайте факультета <i class="fas fa-arrow-up-right-from-square" aria-hidden="true"></i></a>
+  </header>
+
+  <div class="pub-catalog-toolbar">
+    <span class="pub-catalog-total"><strong>{{ total_count }}</strong> кафедр в каталоге</span>
+    <nav class="pub-stream-nav" aria-label="Лекционные потоки">{% for group in groups %}<a href="#stream-{{ forloop.counter }}">{{ group.stream }} <span>{{ group.items|length }}</span></a>{% endfor %}</nav>
+  </div>
+
+  <details class="pub-disclosure">
+    <summary><span><i class="fas fa-signs-post" aria-hidden="true"></i> Как попасть на кафедру</span><i class="fas fa-chevron-down pub-disclosure-chevron" aria-hidden="true"></i></summary>
+    <div class="pub-disclosure-body">
+      <div class="pub-distribution-grid">
+        {% for step in distribution_steps %}<div class="pub-distribution-step"><span class="pub-row-index">0{{ forloop.counter }}</span><div><h3>{{ step.title }}</h3><p>{{ step.note }}</p></div></div>{% endfor %}
+      </div>
+      <a class="pub-text-link" href="https://cs.msu.ru/node/3300" target="_blank" rel="noopener">Материалы о распределении <i class="fas fa-arrow-up-right-from-square" aria-hidden="true"></i></a>
+    </div>
+  </details>
+
+  {% for group in groups %}
+  <section class="pub-stream" id="stream-{{ forloop.counter }}">
+    <div class="pub-stream-heading"><h2>{{ group.stream }}</h2><span>{{ group.items|length }} {% if group.items|length == 1 %}кафедра{% elif group.items|length < 5 %}кафедры{% else %}кафедр{% endif %}</span></div>
+    <div class="pub-dept-grid">
+      {% for dept in group.items %}
+      <a class="pub-dept-card" href="{% url 'department_detail' dept.id %}">
+        <div class="pub-dept-card-top"><span class="pub-dept-abbr">{{ dept.abbr }}</span><i class="fas fa-arrow-up-right-from-square" aria-hidden="true"></i></div>
+        <h3>{{ dept.name }}</h3>
+        <p>{{ dept.directions|slice:":3"|join:" · " }}</p>
+        <div class="pub-dept-footer"><span class="pub-dept-head-label">Заведующий кафедрой</span><span>{{ dept.head }}</span></div>
+      </a>
+      {% endfor %}
+    </div>
+  </section>
+  {% empty %}
+  <div class="ds-empty"><i class="fas fa-building-columns" aria-hidden="true"></i><h2>Каталог пока пуст</h2><p>Сведения о кафедрах доступны на официальном сайте факультета.</p><a href="https://cs.msu.ru/departments" class="ds-btn ds-btn-secondary" target="_blank" rel="noopener">Открыть кафедры ВМК</a></div>
+  {% endfor %}
+</div>
+{% endblock %}

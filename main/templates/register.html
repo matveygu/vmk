@@ -1,0 +1,61 @@
+{% extends 'ds_bare_base.html' %}
+{% load static %}
+{% block title %}Регистрация — Учебный портал ВМК МГУ{% endblock %}
+{% block extra_css %}<link href="{% static 'css/ds/auth.css' %}?v=20260912-3" rel="stylesheet">{% endblock %}
+{% block content %}
+<div class="ds-auth-layout">
+  {% include 'partials/ds_auth_story.html' %}
+  <main class="ds-auth-main">
+    <div class="ds-auth-utilities">
+      <a href="{% url 'login' %}" class="ds-auth-back"><i class="fas fa-arrow-left" aria-hidden="true"></i> К входу</a>
+      <button type="button" class="ds-theme-toggle" onclick="dsToggleTheme()" aria-label="Переключить тему"><i class="fas fa-sun ds-theme-icon-sun" aria-hidden="true"></i><i class="fas fa-moon ds-theme-icon-moon" aria-hidden="true"></i></button>
+    </div>
+    <div class="ds-auth-card ds-auth-register">
+      <div class="ds-auth-head">
+        <span class="ds-eyebrow">Присоединиться к порталу</span>
+        <h1>Создать аккаунт</h1>
+        <p>Укажите свои данные и email. Затем подтвердите адрес кодом из письма.</p>
+      </div>
+      {% if form.non_field_errors %}<div class="ds-alert ds-alert-error" role="alert">{{ form.non_field_errors }}</div>{% endif %}
+      <form method="post" class="ds-auth-fields">
+        {% csrf_token %}
+        <div class="ds-auth-form-grid">
+          {% for field in form %}
+          <div class="ds-field{% if field.name == 'name' or field.name == 'faculty' or field.name == 'email' %} ds-field-wide{% endif %}">
+            <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+            {% if field.name == 'password1' or field.name == 'password2' %}
+            <div class="ds-input-wrap">
+              {{ field }}
+              <button type="button" class="ds-icon-btn ds-input-trailing ds-register-toggle" data-target="{{ field.id_for_label }}" aria-label="Показать пароль" aria-pressed="false"><i class="fas fa-eye" aria-hidden="true"></i></button>
+            </div>
+            {% else %}{{ field }}{% endif %}
+            {% if field.errors %}<span class="ds-field-error" role="alert">{{ field.errors.0 }}</span>{% endif %}
+            {% if field.name == 'group_number' %}<span class="ds-field-help">Например, 105. Группа должна быть в системе.</span>{% endif %}
+            {% if field.name == 'email' %}<span class="ds-field-help">{{ field.help_text }}</span>{% endif %}
+          </div>
+          {% endfor %}
+        </div>
+        <span class="ds-field-help">Пароль — не менее 8 символов; не используйте только цифры.</span>
+        <button type="submit" class="ds-btn ds-btn-primary ds-btn-lg ds-btn-full">Получить код на email <i class="fas fa-arrow-right" aria-hidden="true"></i></button>
+      </form>
+      <div class="ds-auth-footer">Уже есть аккаунт? <a href="{% url 'login' %}">Войти</a></div>
+    </div>
+    <span class="ds-auth-caption">Учебный портал · Студенческий проект ВМК МГУ</span>
+  </main>
+</div>
+{% endblock %}
+{% block extra_js %}
+<script>
+document.querySelectorAll('.ds-register-toggle').forEach(function (button) {
+  button.addEventListener('click', function () {
+    var input = document.getElementById(button.dataset.target);
+    var show = input.type === 'password';
+    input.type = show ? 'text' : 'password';
+    button.setAttribute('aria-pressed', String(show));
+    button.setAttribute('aria-label', show ? 'Скрыть пароль' : 'Показать пароль');
+    button.querySelector('i').className = show ? 'fas fa-eye-slash' : 'fas fa-eye';
+  });
+});
+document.querySelectorAll('input[name^="password"]').forEach(function (input) { input.autocomplete = 'new-password'; });
+</script>
+{% endblock %}

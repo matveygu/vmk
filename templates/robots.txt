@@ -1,0 +1,13 @@
+User-agent: *
+Disallow: /admin/
+Disallow: /profile/
+Disallow: /profile/edit/
+Disallow: /materials/upload/
+Disallow: /materials/edit/
+Disallow: /materials/delete/
+Disallow: /materials/folder/
+Allow: /
+Allow: /schedule/
+Allow: /materials/
+
+Sitemap: https://msu-study-portal.onrender.com/sitemap.xml

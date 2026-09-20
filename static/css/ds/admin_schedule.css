@@ -1,0 +1,61 @@
+/* Schedule administration, scoped to avoid changing the public timetable. */
+.ds-scope .as-filter-form { display: flex; align-items: flex-end; gap: 12px; flex-wrap: wrap; width: 100%; }
+.ds-scope .as-filter-form > .ds-field { flex: 1; min-width: 200px; max-width: 430px; }
+.ds-scope .as-filter-form label, .ds-scope .as-editor label { font-size: 13px; line-height: 1.5; }
+.ds-scope .as-filter-form .ds-input, .ds-scope .as-filter-form .ds-select, .ds-scope .as-editor .ds-input, .ds-scope .as-editor .ds-select { font-size: 14px; min-height: 44px; width: 100%; }
+.ds-scope .as-filter-error { margin: 0 24px 16px; }
+.ds-scope .as-lessons, .ds-scope .as-subjects { min-width: 0; }
+.ds-scope .as-lesson { display: grid; grid-template-columns: 85px minmax(0, 1fr) auto; gap: 22px; padding: 22px 24px; align-items: center; border-bottom: 1px solid var(--ds-border-subtle); }
+.ds-scope .as-lesson:last-child { border-bottom: 0; }
+.ds-scope .as-lesson-time { display: grid; gap: 3px; font-variant-numeric: tabular-nums; }
+.ds-scope .as-lesson-time > strong { color: var(--ds-text-heading); font-size: 15px; font-weight: 600; }
+.ds-scope .as-lesson-time > span { font-size: 12px; color: var(--ds-text-muted); }
+.ds-scope .as-lesson-time .as-lesson-number { margin-bottom: 5px; color: var(--ds-brand-primary); }
+.ds-scope .as-lesson-main { min-width: 0; }
+.ds-scope .as-lesson-main h3 { font: 600 15px/1.5 var(--ds-font-ui); margin: 0 0 5px; color: var(--ds-text-heading); overflow-wrap: anywhere; }
+.ds-scope .as-lesson-main p { font-size: 13px; line-height: 1.6; margin: 0; color: var(--ds-text-muted); overflow-wrap: anywhere; }
+.ds-scope .as-lesson-meta { display: flex; align-items: center; flex-wrap: wrap; gap: 8px 16px; margin-top: 10px; font-size: 12px; color: var(--ds-text-muted); }
+.ds-scope .as-lesson-meta > span { overflow-wrap: anywhere; }
+.ds-scope .as-lesson-meta i { margin-right: 4px; }
+.ds-scope .as-parity { border-radius: 6px; padding: 3px 7px; background: var(--ds-surface-sunken); }
+.ds-scope .as-row-actions { display: flex; flex-shrink: 0; gap: 6px; }
+.ds-scope .as-row-actions .ds-icon-btn { width: 36px; height: 36px; min-width: 36px; min-height: 36px; }
+.ds-scope .as-danger-link { color: var(--ds-error-fg); }
+.ds-scope .as-editor-layout { display: grid; grid-template-columns: minmax(0, 760px) minmax(200px, 1fr); gap: 30px; align-items: start; }
+.ds-scope .as-editor { margin: 0; padding: 28px; min-width: 0; }
+.ds-scope .as-editor-small, .ds-scope .as-confirm { width: 100%; max-width: 660px; }
+.ds-scope .as-fieldset { border: 0; margin: 0 0 28px; padding: 0; min-width: 0; }
+.ds-scope .as-fieldset:last-of-type { margin-bottom: 0; }
+.ds-scope .as-fieldset legend { color: var(--ds-text-heading); font-size: 16px; font-weight: 600; padding: 0; margin-bottom: 18px; }
+.ds-scope .as-field-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px; }
+.ds-scope .as-field-grid > .ds-field { min-width: 0; }
+.ds-scope .as-fieldset > .as-hint { margin: -6px 0 18px; }
+.ds-scope .as-hint, .ds-scope .as-optional { color: var(--ds-text-muted); font-size: 12px; line-height: 1.7; font-weight: 400; }
+.ds-scope .as-optional { margin-left: 4px; }
+.ds-scope .as-error { color: var(--ds-error-fg); font-size: 12px; line-height: 1.65; }
+.ds-scope .as-editor-aside { max-width: 290px; padding: 18px 0; }
+.ds-scope .as-editor-aside h2 { font: 600 16px/1.5 var(--ds-font-ui); color: var(--ds-text-heading); margin: 18px 0 10px; }
+.ds-scope .as-editor-aside h3 { font: 600 13px/1.5 var(--ds-font-ui); color: var(--ds-text-heading); margin: 22px 0 7px; }
+.ds-scope .as-editor-aside p { margin: 0; color: var(--ds-text-muted); font-size: 13px; line-height: 1.75; }
+.ds-scope .as-confirm h2 { color: var(--ds-text-heading); font: 600 20px/1.5 var(--ds-font-ui); margin: 0 0 10px; overflow-wrap: anywhere; }
+.ds-scope .as-confirm > p { font-size: 14px; line-height: 1.75; color: var(--ds-text-muted); }
+.ds-scope .as-confirm .ds-alert { display: block; margin-top: 20px; line-height: 1.7; }
+.ds-scope .as-subjects { padding: 0; overflow: hidden; }
+.ds-scope .as-subject-search { padding: 22px; background: var(--ds-surface-sunken); border-bottom: 1px solid var(--ds-border-subtle); }
+.ds-scope .as-subject-row { display: flex; align-items: center; justify-content: space-between; gap: 20px; padding: 20px 24px; border-bottom: 1px solid var(--ds-border-subtle); }
+.ds-scope .as-subject-row:last-child { border-bottom: 0; }
+.ds-scope .as-subject-row > div:first-child { min-width: 0; }
+.ds-scope .as-subject-row h2 { margin: 0 0 6px; color: var(--ds-text-heading); font: 600 15px/1.5 var(--ds-font-ui); overflow-wrap: anywhere; }
+.ds-scope .as-subject-row p { margin: 0; color: var(--ds-text-muted); font-size: 12px; line-height: 1.6; }
+.ds-scope .as-pagination { display: flex; align-items: center; justify-content: center; flex-wrap: wrap; gap: 16px; padding: 20px; color: var(--ds-text-muted); font-size: 13px; }
+@media (max-width: 1100px) { .ds-scope .as-editor-layout { grid-template-columns: minmax(0, 760px); gap: 20px; } .ds-scope .as-editor-aside { max-width: 760px; padding: 0 4px; } .ds-scope .as-editor-aside > .ws-panel-icon { display: none; } }
+@media (max-width: 640px) {
+  .ds-scope .as-filter-form > .ds-field { min-width: 100%; max-width: none; }
+  .ds-scope .as-lesson { grid-template-columns: 64px minmax(0, 1fr); gap: 12px; padding: 18px 16px; align-items: start; }
+  .ds-scope .as-lesson > .as-row-actions { grid-column: 2; }
+  .ds-scope .as-editor { padding: 20px; }
+  .ds-scope .as-field-grid { grid-template-columns: minmax(0, 1fr); gap: 18px; }
+  .ds-scope .as-editor .ds-input, .ds-scope .as-editor .ds-select, .ds-scope .as-filter-form .ds-input, .ds-scope .as-filter-form .ds-select { font-size: 16px; }
+  .ds-scope .as-subject-row { padding: 18px 16px; gap: 12px; }
+  .ds-scope .as-subject-search { padding: 18px 16px; }
+}

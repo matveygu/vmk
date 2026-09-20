@@ -1,0 +1,182 @@
+/* ============================================================
+   Design-system tokens for the redesigned public pages.
+   Scoped to `.ds-scope` (not :root) so they never touch the
+   existing Bootstrap-based site — that already has its own
+   radius and shadow tokens in base.css with different values.
+   ============================================================ */
+@import url("https://fonts.googleapis.com/css2?family=Golos+Text:wght@400;500;600;700;800&family=Spectral:ital,wght@0,400;0,500;0,600;0,700;1,400&family=JetBrains+Mono:wght@400;500&display=swap");
+
+.ds-scope {
+  /* brand */
+  --ds-brand-primary: #285dd7;
+  --ds-brand-primary-hover: #204eb9;
+  --ds-brand-primary-active: #173c70;
+  --ds-brand-primary-soft: #edf3ff;
+  --ds-brand-primary-soft-border: #cddcf8;
+  --ds-brand-on-primary: #ffffff;
+  --ds-brand-accent: #3cb4e3;
+  --ds-brand-accent-strong: #3267a7;
+  --ds-brand-accent-soft: #eefaff;
+
+  /* surfaces */
+  --ds-bg-page: #f5f7fb;
+  --ds-surface-card: #ffffff;
+  --ds-surface-sunken: #f5f7fb;
+  --ds-surface-hover: #f0f4fa;
+
+  /* text */
+  --ds-text-body: #344159;
+  --ds-text-heading: #172b49;
+  --ds-text-muted: #66748b;
+  --ds-text-link: #285dd7;
+  --ds-text-link-hover: #072660;
+
+  /* borders */
+  --ds-border-subtle: #e3e9f2;
+  --ds-border-default: #cbd5e3;
+  --ds-border-focus: #1f5cc0;
+
+  /* news / status hues reused for badges */
+  --ds-info-fg: #0f74a0;
+  --ds-info-bg: #d6f2fd;
+  --ds-info-border: #74d0f2;
+  --ds-neutral-fg: #525c6b;
+  --ds-neutral-bg: #eaeef3;
+  --ds-neutral-border: #dbe1e9;
+
+  /* type */
+  --ds-font-ui: "Golos Text", "Segoe UI", system-ui, sans-serif;
+  --ds-font-display: "Spectral", Georgia, "Times New Roman", serif;
+  --ds-font-mono: "JetBrains Mono", ui-monospace, "SF Mono", Consolas, monospace;
+  --ds-fs-h1: 2rem;   --ds-lh-h1: 1.2;
+  --ds-fs-h2: 1.5rem; --ds-lh-h2: 1.25;
+  --ds-fs-h3: 1.125rem; --ds-lh-h3: 1.4;
+  --ds-fs-body-lg: 1.0625rem; --ds-lh-body-lg: 1.65;
+  --ds-fs-body: 1rem; --ds-lh-body: 1.6;
+  --ds-fs-body-sm: .875rem; --ds-lh-body-sm: 1.55;
+  --ds-fs-caption: .8125rem; --ds-lh-caption: 1.5;
+  --ds-fs-micro: .75rem; --ds-lh-micro: 1.4;
+  --ds-ls-caps: 0.08em;
+  --ds-ls-display: -0.02em;
+
+  /* spacing / shape */
+  --ds-space-2: 8px; --ds-space-3: 12px; --ds-space-4: 16px;
+  --ds-space-5: 20px; --ds-space-6: 24px; --ds-space-8: 32px;
+  --ds-radius-sm: 10px; --ds-radius-md: 14px; --ds-radius-lg: 18px; --ds-radius-pill: 999px;
+  --ds-container-max: 1280px;
+  --ds-grid-gutter: 24px;
+
+  --ds-fs-h4: 16px; --ds-lh-h4: 1.35;
+
+  /* layout metrics */
+  --ds-topnav-h: 72px;
+  --ds-subheader-h: 36px;
+  --ds-sidebar-w: 236px;
+  --ds-tap-min: 44px;
+
+  /* elevation */
+  --ds-shadow-xs: 0 2px 6px rgba(23,43,73,.025);
+  --ds-shadow-md: 0 8px 24px rgba(23,43,73,.07);
+  --ds-shadow-lg: 0 20px 60px rgba(23,43,73,.14);
+  --ds-shadow-nav: 0 1px 0 rgba(27,26,25,.08);
+  --ds-focus-ring: 0 0 0 3px rgba(31,92,192,.22);
+
+  /* nav gradient, reused for the hero-like header strip */
+  --ds-nav-bg: #122d51;
+  --ds-nav-bg-2: #244c80;
+  --ds-nav-fg: rgba(255,255,255,.88);
+  --ds-nav-fg-strong: #ffffff;
+  --ds-nav-hover: rgba(255,255,255,.14);
+  --ds-nav-active: rgba(255,255,255,.22);
+  --ds-subheader-bg: #fafbfc;
+
+  /* news categories */
+  --ds-cat-news-fg: #0f47a6; --ds-cat-news-bg: #dbe8fa; --ds-cat-news-border: #85aeea;
+  --ds-cat-announcement-fg: #8a5e08; --ds-cat-announcement-bg: #fbeccd; --ds-cat-announcement-border: #edc471;
+  --ds-cat-event-fg: #2a7a46; --ds-cat-event-bg: #dff0e2; --ds-cat-event-border: #8fc9a0;
+
+  /* status */
+  --ds-success-fg: #2a7a46; --ds-success-bg: #dff0e2; --ds-success-border: #8fc9a0;
+  --ds-warning-fg: #8a5e08; --ds-warning-bg: #fbeccd; --ds-warning-border: #edc471;
+  --ds-error-fg: #a51e30; --ds-error-bg: #fdf2f3; --ds-error-border: #f2c4c8;
+
+  /* roles */
+  --ds-role-student-fg: #525c6b; --ds-role-student-bg: #eaeef3;
+  --ds-role-headman-fg: #1f7472; --ds-role-headman-bg: #d8eeee;
+  --ds-role-teacher-fg: #0f47a6; --ds-role-teacher-bg: #dbe8fa;
+  --ds-role-media-fg: #5f4aa3; --ds-role-media-bg: #e8e2f5;
+  --ds-role-uploader-fg: #8a5e08; --ds-role-uploader-bg: #fbeccd;
+  --ds-role-admin-fg: #a51e30; --ds-role-admin-bg: #fdf2f3;
+
+  /* file types (Диск) */
+  --ds-file-video: #c0293c; --ds-file-audio: #a9740b; --ds-file-image: #2a7a46;
+  --ds-file-document: #a51e30; --ds-file-text: #717c8c; --ds-file-presentation: #5f4aa3;
+  --ds-file-code: #1f7472; --ds-file-other: #98a3b3; --ds-file-folder: #1794c6;
+}
+
+[data-theme="dark"] .ds-scope {
+  --ds-brand-primary: #5b9bf0;
+  --ds-brand-primary-hover: #7db2f6;
+  --ds-brand-primary-active: #3f7fd6;
+  --ds-brand-primary-soft: #122540;
+  --ds-brand-primary-soft-border: #1f3e66;
+  --ds-brand-on-primary: #0d1117;
+  --ds-brand-accent: #74d0f2;
+  --ds-brand-accent-strong: #a9e4fa;
+  --ds-brand-accent-soft: #0b2a38;
+
+  --ds-bg-page: #0e131b;
+  --ds-surface-card: #171e29;
+  --ds-surface-sunken: #121822;
+  --ds-surface-hover: #222b3a;
+
+  --ds-text-body: #dde4ee;
+  --ds-text-heading: #f2f6fb;
+  --ds-text-muted: #94a0b2;
+  --ds-text-link: #7db2f6;
+  --ds-text-link-hover: #a8cbfa;
+
+  --ds-border-subtle: #28313f;
+  --ds-border-default: #374252;
+  --ds-border-focus: #5b9bf0;
+
+  --ds-info-fg: #74d0f2;
+  --ds-info-bg: #0b2a38;
+  --ds-info-border: #12475e;
+  --ds-neutral-fg: #aab4c2;
+  --ds-neutral-bg: #222b3a;
+  --ds-neutral-border: #374252;
+
+  --ds-shadow-xs: 0 1px 2px rgba(0,0,0,.4);
+  --ds-shadow-md: 0 4px 14px rgba(0,0,0,.5);
+  --ds-shadow-lg: 0 14px 36px rgba(0,0,0,.6);
+  --ds-shadow-nav: 0 1px 0 rgba(0,0,0,.5);
+  --ds-focus-ring: 0 0 0 3px rgba(91,155,240,.28);
+
+  --ds-nav-bg: #061a3d;
+  --ds-nav-bg-2: #0b3070;
+  --ds-nav-fg: rgba(255,255,255,.82);
+  --ds-nav-fg-strong: #ffffff;
+  --ds-nav-hover: rgba(255,255,255,.10);
+  --ds-nav-active: rgba(255,255,255,.18);
+  --ds-subheader-bg: #1e2634;
+
+  --ds-cat-news-fg: #85aeea; --ds-cat-news-bg: #15243c; --ds-cat-news-border: #2a4470;
+  --ds-cat-announcement-fg: #edc471; --ds-cat-announcement-bg: #372a11; --ds-cat-announcement-border: #5f4a1c;
+  --ds-cat-event-fg: #8fc9a0; --ds-cat-event-bg: #152c1f; --ds-cat-event-border: #2b5138;
+
+  --ds-success-fg: #8fc9a0; --ds-success-bg: #152c1f; --ds-success-border: #2b5138;
+  --ds-warning-fg: #edc471; --ds-warning-bg: #372a11; --ds-warning-border: #5f4a1c;
+  --ds-error-fg: #ef8f9b; --ds-error-bg: #331419; --ds-error-border: #5c242c;
+
+  --ds-role-student-fg: #aab4c2; --ds-role-student-bg: #222b3a;
+  --ds-role-headman-fg: #86c8c7; --ds-role-headman-bg: #123231;
+  --ds-role-teacher-fg: #85aeea; --ds-role-teacher-bg: #15243c;
+  --ds-role-media-fg: #b6a5df; --ds-role-media-bg: #241c3f;
+  --ds-role-uploader-fg: #edc471; --ds-role-uploader-bg: #372a11;
+  --ds-role-admin-fg: #ef8f9b; --ds-role-admin-bg: #331419;
+
+  --ds-file-video: #ef8f9b; --ds-file-audio: #edc471; --ds-file-image: #8fc9a0;
+  --ds-file-document: #ef8f9b; --ds-file-text: #94a0b2; --ds-file-presentation: #b6a5df;
+  --ds-file-code: #86c8c7; --ds-file-other: #717c8c; --ds-file-folder: #74d0f2;
+}

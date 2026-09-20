@@ -1,0 +1,75 @@
+{% extends 'ds_base.html' %}
+{% load static %}
+
+{% block title %}Настройки профиля — Портал ВМК МГУ{% endblock %}
+
+{% block content %}
+<div class="ds-page-header ws-page-header">
+  <div><span class="ds-eyebrow">Личный кабинет</span><h1>Настройки профиля</h1><p>Личные данные, фотография и безопасность аккаунта.</p></div>
+  <div class="ds-actions"><a href="{% url 'profile' %}" class="ds-btn ds-btn-secondary"><i class="fas fa-arrow-left" aria-hidden="true"></i> К профилю</a></div>
+</div>
+
+<div class="ws-settings-layout">
+  <nav class="ws-settings-nav" aria-label="Настройки профиля"><a href="#personal"><i class="far fa-user" aria-hidden="true"></i> Личные данные</a><a href="#password"><i class="fas fa-shield-halved" aria-hidden="true"></i> Пароль и безопасность</a><p>Изменения в каждом разделе сохраняются отдельно.</p></nav>
+  <div class="ws-stack">
+    <section class="ds-card ws-settings-section" id="personal" aria-labelledby="wsPersonalTitle">
+      <div class="ws-panel-title"><span class="ws-panel-icon"><i class="far fa-user" aria-hidden="true"></i></span><div><h2 id="wsPersonalTitle">Личные данные</h2><p>Так вас видят в учебном портале</p></div></div>
+      <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        {% if form.non_field_errors %}<div class="ds-alert ds-alert-error">{{ form.non_field_errors }}</div>{% endif %}
+        <div class="ws-photo-field">
+          {% if user.photo %}<img id="dsPhotoPreview" src="{{ user.photo.url }}" class="ws-photo-preview" alt="Предпросмотр фотографии">{% else %}<span id="dsPhotoPreview" class="ws-photo-preview" aria-hidden="true">{{ user.name|default:user.student_id|slice:":1"|upper }}</span>{% endif %}
+          <div class="ds-field"><label for="{{ form.photo.id_for_label }}">{{ form.photo.label }}</label>{{ form.photo }}{% if form.photo.errors %}<span class="ws-field-error">{{ form.photo.errors.0 }}</span>{% endif %}<span class="ws-field-hint">Выберите изображение для профиля.</span></div>
+        </div>
+        <div class="ds-field-grid ws-edit-fields">
+          <div class="ds-field ws-field-wide"><label for="{{ form.name.id_for_label }}">{{ form.name.label }}</label>{{ form.name }}{% if form.name.errors %}<span class="ws-field-error">{{ form.name.errors.0 }}</span>{% endif %}</div>
+          <div class="ds-field"><label for="{{ form.email.id_for_label }}">{{ form.email.label }}</label>{{ form.email }}{% if form.email.errors %}<span class="ws-field-error">{{ form.email.errors.0 }}</span>{% endif %}</div>
+          <div class="ds-field"><label for="{{ form.phone.id_for_label }}">{{ form.phone.label }}</label>{{ form.phone }}{% if form.phone.errors %}<span class="ws-field-error">{{ form.phone.errors.0 }}</span>{% endif %}</div>
+        </div>
+        <div class="ws-form-actions"><button type="submit" class="ds-btn ds-btn-primary"><i class="fas fa-check" aria-hidden="true"></i> Сохранить изменения</button><a href="{% url 'profile' %}" class="ds-btn ds-btn-secondary">Отмена</a></div>
+      </form>
+    </section>
+    <section class="ds-card ws-settings-section" id="password" aria-labelledby="wsPasswordTitle">
+      <div class="ws-panel-title"><span class="ws-panel-icon"><i class="fas fa-shield-halved" aria-hidden="true"></i></span><div><h2 id="wsPasswordTitle">Пароль и безопасность</h2><p>Используйте отдельный пароль для учебного портала</p></div></div>
+      <form method="post">
+        {% csrf_token %}<input type="hidden" name="change_password" value="1">
+        <div class="ws-password-fields">
+          <div class="ds-field"><label for="{{ password_form.old_password.id_for_label }}">{{ password_form.old_password.label }}</label>{{ password_form.old_password }}{% if password_form.old_password.errors %}<span class="ws-field-error">{{ password_form.old_password.errors.0 }}</span>{% endif %}</div>
+          <div class="ds-field"><label for="{{ password_form.new_password1.id_for_label }}">{{ password_form.new_password1.label }}</label>{{ password_form.new_password1 }}{% if password_form.new_password1.errors %}<span class="ws-field-error">{{ password_form.new_password1.errors.0 }}</span>{% endif %}{% if password_form.new_password1.help_text %}<div class="ws-password-help">{{ password_form.new_password1.help_text|safe }}</div>{% endif %}</div>
+          <div class="ds-field"><label for="{{ password_form.new_password2.id_for_label }}">{{ password_form.new_password2.label }}</label>{{ password_form.new_password2 }}{% if password_form.new_password2.errors %}<span class="ws-field-error">{{ password_form.new_password2.errors.0 }}</span>{% endif %}</div>
+        </div>
+        {% if password_form.non_field_errors %}<div class="ws-field-error">{{ password_form.non_field_errors.0 }}</div>{% endif %}
+        <div class="ws-form-actions"><button type="submit" class="ds-btn ds-btn-primary"><i class="fas fa-key" aria-hidden="true"></i> Обновить пароль</button></div>
+      </form>
+    </section>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+(function () {
+  const photoInput = document.getElementById('{{ form.photo.id_for_label|escapejs }}');
+  if (!photoInput) return;
+  photoInput.addEventListener('change', function (event) {
+    const file = event.target.files[0];
+    if (!file || !file.type.startsWith('image/')) return;
+    const reader = new FileReader();
+    reader.onload = function (result) {
+      const current = document.getElementById('dsPhotoPreview');
+      if (!current) return;
+      if (current.tagName === 'IMG') current.src = result.target.result;
+      else {
+        const img = document.createElement('img');
+        img.id = 'dsPhotoPreview';
+        img.className = 'ws-photo-preview';
+        img.alt = 'Предпросмотр фотографии';
+        img.src = result.target.result;
+        current.replaceWith(img);
+      }
+    };
+    reader.readAsDataURL(file);
+  });
+})();
+</script>
+{% endblock %}

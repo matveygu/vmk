@@ -1,0 +1,15 @@
+{% extends 'ds_base.html' %}
+{% load static %}
+
+{% block title %}Страница не найдена — Учебный портал МГУ{% endblock %}
+
+{% block content %}
+<div class="ds-card">
+  <div class="ds-empty">
+    <i class="fas fa-compass"></i>
+    <span class="ds-empty-title">Страница не найдена</span>
+    <span class="ds-empty-desc">Проверьте адрес или вернитесь на главную.</span>
+    <a href="{% url 'home' %}" class="ds-btn ds-btn-primary"><i class="fas fa-house"></i> На главную</a>
+  </div>
+</div>
+{% endblock %}

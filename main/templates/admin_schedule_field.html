@@ -1,0 +1,1 @@
+<div class="ds-field"><label for="{{ field.id_for_label }}">{{ field.label }}{% if not field.field.required %} <span class="as-optional">необязательно</span>{% endif %}</label>{{ field }}{% for error in field.errors %}<span class="as-error" role="alert">{{ error }}</span>{% endfor %}{% if field.help_text %}<span class="as-hint">{{ field.help_text }}</span>{% endif %}</div>

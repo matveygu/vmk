@@ -1,0 +1,131 @@
+{% extends 'ds_base.html' %}
+{% load static humanize %}
+{% block title %}Материалы — Учебный портал МГУ{% endblock %}
+{% block content %}
+<div class="ds-page-header">
+  <div><span class="ds-eyebrow">Учебное пространство</span><h1>Материалы</h1><p>Лекции, семинары и всё необходимое для подготовки к занятиям.</p></div>
+  {% if can_manage %}<div class="ds-actions">
+    <button type="button" class="ds-btn ds-btn-secondary" onclick="dsOpenModal('dsCreateFolderModal')"><i class="fas fa-folder-plus" aria-hidden="true"></i> Новая папка</button>
+    <a class="ds-btn ds-btn-primary" href="{% url 'upload_material' %}{% if current_folder %}?folder={{ current_folder.id }}{% endif %}"><i class="fas fa-plus" aria-hidden="true"></i> Загрузить материал</a>
+  </div>{% endif %}
+</div>
+
+<div class="ds-card study-drive-toolbar">
+  <form method="get" class="study-drive-search" role="search">
+    <div class="ds-input-wrap"><i class="fas fa-search leading" aria-hidden="true"></i><input type="search" name="q" value="{{ query }}" class="ds-input with-icon" placeholder="Поиск по названию" aria-label="Поиск материалов"></div>
+    <button type="submit" class="ds-icon-btn" aria-label="Найти материалы" title="Найти"><i class="fas fa-arrow-right" aria-hidden="true"></i></button>
+  </form>
+  <div class="study-drive-views"><span class="study-caption">Элементов: {{ total_items }}</span>
+    <div class="ds-segmented" aria-label="Вид материалов">
+      <button type="button" class="active" id="dsDriveGridBtn" onclick="dsDriveView('grid')" aria-label="Плитка" title="Плитка" aria-pressed="true"><i class="fas fa-border-all" aria-hidden="true"></i></button>
+      <button type="button" id="dsDriveListBtn" onclick="dsDriveView('list')" aria-label="Список" title="Список" aria-pressed="false"><i class="fas fa-list" aria-hidden="true"></i></button>
+    </div>
+  </div>
+</div>
+
+<div class="study-drive-breadcrumb">
+  <nav class="ds-breadcrumb" aria-label="Расположение папки">
+    <a href="{% url 'materials_drive_root' %}"><i class="fas fa-hard-drive" aria-hidden="true"></i> Все материалы</a>
+    {% for crumb in breadcrumbs %}<span aria-hidden="true">/</span>{% if forloop.last %}<span class="current" aria-current="page">{{ crumb.name }}</span>{% else %}<a href="{% url 'materials_drive_folder' crumb.id %}">{{ crumb.name }}</a>{% endif %}{% endfor %}
+  </nav>
+  {% if current_folder and can_manage %}<div class="study-folder-actions">
+    <a href="{% url 'edit_material_folder' current_folder.id %}" class="ds-btn ds-btn-secondary ds-btn-sm"><i class="fas fa-pen" aria-hidden="true"></i> Переименовать</a>
+    <a href="{% url 'delete_material_folder' current_folder.id %}" class="ds-icon-btn danger" aria-label="Удалить папку" title="Удалить папку"><i class="fas fa-trash" aria-hidden="true"></i></a>
+  </div>{% endif %}
+</div>
+
+<section class="ds-card study-drive-card" id="dsDriveCard" aria-label="Содержимое материалов">
+  {% if query %}<div class="study-section-heading"><h2>Поиск: «{{ query }}»</h2><a class="study-text-link" href="{% if current_folder %}{% url 'materials_drive_folder' current_folder.id %}{% else %}{% url 'materials_drive_root' %}{% endif %}">Сбросить поиск <i class="fas fa-xmark" aria-hidden="true"></i></a></div>{% endif %}
+  {% if total_items == 0 %}
+  <div class="ds-empty"><i class="fas {% if query %}fa-magnifying-glass{% else %}fa-folder-open{% endif %}" aria-hidden="true"></i>
+    <span class="ds-empty-title">{% if query %}Ничего не найдено{% else %}Здесь будут учебные материалы{% endif %}</span>
+    <span class="ds-empty-desc">{% if query %}Проверьте название или попробуйте более короткий запрос.{% elif can_manage %}Загрузите первый файл. Папки помогут распределить материалы по курсам и темам.{% else %}Когда преподаватель добавит файлы, вы сможете открыть или скачать их здесь.{% endif %}</span>
+    {% if can_manage and not query %}<a class="ds-btn ds-btn-primary" href="{% url 'upload_material' %}{% if current_folder %}?folder={{ current_folder.id }}{% endif %}"><i class="fas fa-plus" aria-hidden="true"></i> Загрузить файл</a>{% endif %}
+  </div>
+  {% else %}
+  <div id="dsDriveGrid">
+    {% if subfolders %}<h2 class="study-drive-section-title">Папки <span>{{ subfolders|length }}</span></h2>
+    <div class="study-folder-grid">{% for f in subfolders %}
+      <div class="study-folder-card">
+        <a class="study-folder" href="{% url 'materials_drive_folder' f.id %}"><i class="fas fa-folder" aria-hidden="true"></i><span><strong title="{{ f.name }}">{{ f.name }}</strong><small>{% if f.material_count is not None %}Элементов: {{ f.material_count }}{% else %}{{ f.created_at|date:"d.m.Y" }}{% endif %}</small></span></a>
+        {% if can_manage %}<a href="{% url 'delete_material_folder' f.id %}" class="ds-icon-btn danger study-folder-card-delete" title="Удалить папку" aria-label="Удалить папку {{ f.name }}"><i class="fas fa-trash" aria-hidden="true"></i></a>{% endif %}
+      </div>
+    {% endfor %}</div>{% endif %}
+    {% if materials %}<h2 class="study-drive-section-title">Файлы <span>{{ materials|length }}</span></h2>
+    <div class="study-material-grid">{% for m in materials %}
+      <article class="study-material-card">
+        <a href="{% url 'view_material' m.id %}" class="study-material-open">
+          <span class="study-material-visual ds-file-{{ m.type }}">{% include 'study_material_icon.html' with material_type=m.type %}</span>
+          <span class="study-material-info"><strong title="{{ m.name }}">{{ m.name }}</strong><span>{{ m.get_type_display }} · {{ m.size|filesizeformat }}</span></span>
+        </a>
+        <div class="study-material-foot"><span>{{ m.upload_date|date:"d.m.Y" }}</span><div>
+          <a href="{% url 'download_material' m.id %}" class="ds-icon-btn" title="Скачать" aria-label="Скачать {{ m.name }}" download><i class="fas fa-download" aria-hidden="true"></i></a>
+          {% if can_manage %}<a href="{% url 'edit_material' m.id %}" class="ds-icon-btn" title="Изменить" aria-label="Изменить {{ m.name }}"><i class="fas fa-pen" aria-hidden="true"></i></a>
+          <form method="post" action="{% url 'delete_material' m.id %}" class="study-inline-form" onsubmit="return confirm('Удалить материал?')">{% csrf_token %}<button type="submit" class="ds-icon-btn danger" title="Удалить" aria-label="Удалить {{ m.name }}"><i class="fas fa-trash" aria-hidden="true"></i></button></form>
+          {% endif %}
+        </div></div>
+      </article>
+    {% endfor %}</div>{% endif %}
+  </div>
+  <div id="dsDriveList" class="study-file-list" hidden>
+    <div class="ds-file-row study-file-list-heading" aria-hidden="true"><span></span><span>Название</span><span class="study-file-type">Тип</span><span>Дата и размер</span><span></span></div>
+    {% for f in subfolders %}<div class="ds-file-row">
+      <span class="icon ds-file-folder"><i class="fas fa-folder" aria-hidden="true"></i></span>
+      <a href="{% url 'materials_drive_folder' f.id %}" class="name" title="{{ f.name }}">{{ f.name }}</a>
+      <span class="meta study-file-type">Папка</span><span class="meta study-file-date">{{ f.created_at|date:"d.m.Y" }}{% if f.material_count is not None %} · элементов: {{ f.material_count }}{% endif %}</span>
+      <span class="actions">
+        {% if can_manage %}<a href="{% url 'delete_material_folder' f.id %}" class="ds-icon-btn danger" title="Удалить папку" aria-label="Удалить папку {{ f.name }}"><i class="fas fa-trash" aria-hidden="true"></i></a>{% else %}<i class="fas fa-chevron-right" aria-hidden="true"></i>{% endif %}
+      </span>
+    </div>{% endfor %}
+    {% for m in materials %}<div class="ds-file-row">
+      <span class="icon ds-file-{{ m.type }}">{% include 'study_material_icon.html' with material_type=m.type %}</span>
+      <a href="{% url 'view_material' m.id %}" class="name" title="{{ m.name }}">{{ m.name }}</a>
+      <span class="meta study-file-type">{{ m.get_type_display }}</span><span class="meta study-file-date">{{ m.upload_date|date:"d.m.Y" }} · {{ m.size|filesizeformat }}</span>
+      <span class="actions">
+        <a href="{% url 'download_material' m.id %}" class="ds-icon-btn" title="Скачать" aria-label="Скачать {{ m.name }}" download><i class="fas fa-download" aria-hidden="true"></i></a>
+        {% if can_manage %}
+        <a href="{% url 'edit_material' m.id %}" class="ds-icon-btn" title="Изменить" aria-label="Изменить {{ m.name }}"><i class="fas fa-pen" aria-hidden="true"></i></a>
+        <form method="post" action="{% url 'delete_material' m.id %}" class="study-inline-form" onsubmit="return confirm('Удалить материал?')">{% csrf_token %}<button type="submit" class="ds-icon-btn danger" title="Удалить" aria-label="Удалить {{ m.name }}"><i class="fas fa-trash" aria-hidden="true"></i></button></form>
+        {% endif %}
+      </span>
+    </div>{% endfor %}
+  </div>
+  {% endif %}
+</section>
+
+{% if can_manage %}
+<div class="ds-modal-scrim" id="dsCreateFolderModal">
+  <div class="ds-modal" role="dialog" aria-modal="true" aria-labelledby="dsCreateFolderTitle">
+    <div class="ds-modal-head"><h3 id="dsCreateFolderTitle">Новая папка</h3></div>
+    <form method="post" action="{% if current_folder %}{% url 'create_material_subfolder' current_folder.id %}{% else %}{% url 'create_material_folder' %}{% endif %}">
+      {% csrf_token %}
+      <div class="ds-modal-body"><div class="ds-field"><label for="dsFolderName">Название папки</label><input type="text" name="name" id="dsFolderName" class="ds-input" placeholder="Например, семинары по математическому анализу" required></div></div>
+      <div class="ds-modal-foot"><button type="button" class="ds-btn ds-btn-secondary" onclick="dsCloseModal('dsCreateFolderModal')">Отмена</button><button type="submit" class="ds-btn ds-btn-primary">Создать папку</button></div>
+    </form>
+  </div>
+</div>
+{% endif %}
+{% endblock %}
+{% block extra_js %}
+<script>
+function dsDriveView(mode) {
+  mode = mode === 'list' ? 'list' : 'grid';
+  var grid = document.getElementById('dsDriveGrid');
+  var list = document.getElementById('dsDriveList');
+  var gridBtn = document.getElementById('dsDriveGridBtn');
+  var listBtn = document.getElementById('dsDriveListBtn');
+  if (grid) grid.hidden = mode !== 'grid';
+  if (list) list.hidden = mode !== 'list';
+  gridBtn.classList.toggle('active', mode === 'grid');
+  listBtn.classList.toggle('active', mode === 'list');
+  gridBtn.setAttribute('aria-pressed', String(mode === 'grid'));
+  listBtn.setAttribute('aria-pressed', String(mode === 'list'));
+  try { localStorage.setItem('ds-materials-view', mode); } catch (_) {}
+}
+(function () {
+  var mode = 'grid';
+  try { mode = localStorage.getItem('ds-materials-view') || mode; } catch (_) {}
+  dsDriveView(mode);
+})();
+</script>
+{% endblock %}

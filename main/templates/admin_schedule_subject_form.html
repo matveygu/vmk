@@ -1,0 +1,8 @@
+{% extends 'admin_base.html' %}
+{% load static %}
+{% block title %}{% if subject %}Переименовать предмет{% else %}Добавить предмет{% endif %} — ВМК МГУ{% endblock %}
+{% block extra_css %}{{ block.super }}<link rel="stylesheet" href="{% static 'css/ds/admin_schedule.css' %}">{% endblock %}
+{% block admin_content %}
+<div class="ds-page-header ws-page-header"><div><span class="ds-eyebrow">Справочник предметов</span><h1>{% if subject %}Переименовать предмет{% else %}Добавить предмет{% endif %}</h1></div></div>
+<form method="post" class="ds-card as-editor as-editor-small">{% csrf_token %}{% include 'admin_schedule_return_fields.html' %}{% if subject %}<div class="ds-alert ds-alert-info"><i class="fas fa-circle-info" aria-hidden="true"></i> Новое название появится у всех занятий и домашних заданий с этим предметом, во всех группах.</div>{% endif %}{% if form.non_field_errors %}<div class="ds-alert ds-alert-error" role="alert">{{ form.non_field_errors }}</div>{% endif %}{% include 'admin_schedule_field.html' with field=form.name %}<div class="ws-form-actions"><button type="submit" class="ds-btn ds-btn-primary">{% if subject %}Сохранить название{% else %}Добавить предмет{% endif %}</button><a href="{{ subject_back_url }}" class="ds-btn ds-btn-secondary">Отмена</a></div></form>
+{% endblock %}

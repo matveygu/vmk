@@ -1,0 +1,8 @@
+{% extends 'admin_base.html' %}
+{% load static %}
+{% block title %}Удалить занятие — ВМК МГУ{% endblock %}
+{% block extra_css %}{{ block.super }}<link rel="stylesheet" href="{% static 'css/ds/admin_schedule.css' %}">{% endblock %}
+{% block admin_content %}
+<div class="ds-page-header ws-page-header"><div><span class="ds-eyebrow">Расписание</span><h1>Удалить занятие?</h1><p>Проверьте занятие и связанные данные перед подтверждением.</p></div></div>
+<section class="ds-card as-confirm"><h2>{{ lesson.subject.name }}</h2><p>Группа {{ lesson.group.number }} · {{ lesson.day }} · {{ lesson.lesson_number }} пара · {{ lesson.time }}–{{ lesson.time_end }}</p><p class="as-hint">{{ lesson.get_week_parity_display }} · {{ lesson.classroom }}</p><div class="ds-alert {% if homework_count %}ds-alert-error{% else %}ds-alert-info{% endif %}">Связанных домашних заданий: <strong>{{ homework_count }}</strong>.{% if homework_count %} Они также будут удалены.{% endif %} Удаление нельзя отменить.</div>{% if confirm_error %}<div class="ds-alert ds-alert-error" role="alert">{{ confirm_error }}</div>{% endif %}<form method="post">{% csrf_token %}{% include 'admin_schedule_return_fields.html' %}{{ form.homework_count }}<div class="ws-form-actions"><a href="{{ back_url }}" class="ds-btn ds-btn-secondary">Отмена</a><button type="submit" class="ds-btn ds-btn-danger"><i class="far fa-trash-can" aria-hidden="true"></i> Удалить занятие{% if homework_count %} и ДЗ{% endif %}</button></div></form></section>
+{% endblock %}

@@ -1,0 +1,39 @@
+{% extends 'ds_base.html' %}
+
+{% block title %}Абитуриенту — ВМК МГУ{% endblock %}
+
+{% block content %}
+<div class="pub-page">
+  <header class="pub-page-heading">
+    <div><span class="pub-kicker">Будущим студентам</span><h1>Ваш путь на ВМК</h1><p>Познакомьтесь с факультетом и найдите всё необходимое для поступления в официальных источниках.</p></div>
+    <a href="https://pk.cs.msu.ru/" target="_blank" rel="noopener" class="ds-btn ds-btn-primary">Приёмная комиссия ВМК <i class="fas fa-arrow-up-right-from-square" aria-hidden="true"></i></a>
+  </header>
+
+  <div class="pub-admission-grid">
+    <section class="pub-admission-feature">
+      <span class="pub-kicker">Поступление без лишних поисков</span>
+      <h2>Начните с официальной информации</h2>
+      <p>Правила приёма, вступительные испытания, проходные баллы и календарь приёмной кампании зависят от года и выбранной программы.</p>
+      <a class="ds-btn pub-login-btn" href="https://pk.cs.msu.ru/" target="_blank" rel="noopener">Условия поступления <i class="fas fa-arrow-up-right-from-square" aria-hidden="true"></i></a>
+      <span class="pub-project-note">На сайте приёмной комиссии факультета</span>
+    </section>
+    <div class="pub-admission-links">
+      <a class="pub-resource-card" href="https://cpk.msu.ru/" target="_blank" rel="noopener"><span class="pub-quick-icon"><i class="fas fa-file-lines" aria-hidden="true"></i></span><div><h2>Приёмная комиссия МГУ</h2><p>Общие правила, документы и официальные объявления университета.</p></div><i class="fas fa-arrow-up-right-from-square" aria-hidden="true"></i></a>
+      <a class="pub-resource-card" href="{% url 'department_list' %}"><span class="pub-quick-icon"><i class="fas fa-building-columns" aria-hidden="true"></i></span><div><h2>Чем занимаются на ВМК</h2><p>Кафедры, научные направления и преподаватели факультета.</p></div><i class="fas fa-arrow-right" aria-hidden="true"></i></a>
+      <a class="pub-resource-card" href="{% url 'programs' %}"><span class="pub-quick-icon"><i class="fas fa-graduation-cap" aria-hidden="true"></i></span><div><h2>Подготовка и курсы</h2><p>Познакомьтесь с дополнительными образовательными программами.</p></div><i class="fas fa-arrow-right" aria-hidden="true"></i></a>
+    </div>
+  </div>
+
+  <section class="pub-admission-checklist" aria-labelledby="admission-checklist-title">
+    <div class="pub-section-heading"><span class="pub-kicker">Ориентиры</span><h2 id="admission-checklist-title">Что проверить перед подачей</h2><p>Держите под рукой условия именно вашей приёмной кампании.</p></div>
+    <ol class="pub-checklist">
+      <li><span class="pub-row-index">01</span><div><h3>Направление и программа</h3><p>Сравните программы, формы обучения и условия приёма.</p></div></li>
+      <li><span class="pub-row-index">02</span><div><h3>Вступительные испытания</h3><p>Проверьте набор экзаменов, минимальные баллы и требования к ДВИ.</p></div></li>
+      <li><span class="pub-row-index">03</span><div><h3>Документы и сроки</h3><p>Уточните способ подачи, необходимые документы и ключевые даты.</p></div></li>
+      <li><span class="pub-row-index">04</span><div><h3>Объявления приёмной комиссии</h3><p>Следите за обновлениями и условиями зачисления на официальных сайтах.</p></div></li>
+    </ol>
+  </section>
+  {# Admission scores, thresholds and dates in the current view are demo content. #}
+  <div class="pub-source-note"><i class="fas fa-circle-info" aria-hidden="true"></i><p>Этот портал — неофициальный студенческий проект. Проверенные сроки и баллы публикуют <a href="https://pk.cs.msu.ru/" target="_blank" rel="noopener">приёмная комиссия ВМК</a> и <a href="https://cpk.msu.ru/" target="_blank" rel="noopener">ЦПК МГУ</a>.</p></div>
+</div>
+{% endblock %}

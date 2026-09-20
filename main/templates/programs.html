@@ -1,0 +1,30 @@
+{% extends 'ds_base.html' %}
+
+{% block title %}Дополнительное образование — ВМК МГУ{% endblock %}
+
+{% block content %}
+<div class="pub-page">
+  <header class="pub-page-heading">
+    <div><span class="pub-kicker">Учебный центр и ДПО</span><h1>Учиться дальше</h1><p>Дополнительное образование для школьников, студентов и специалистов.</p></div>
+    <a href="https://vmk-edu.ru/" target="_blank" rel="noopener" class="ds-btn ds-btn-secondary">Учебный центр ВМК <i class="fas fa-arrow-up-right-from-square" aria-hidden="true"></i></a>
+  </header>
+
+  <div class="pub-program-grid">
+    {% for p in programs %}
+    <article class="pub-program-card">
+      <div class="pub-program-top"><span class="pub-row-index">0{{ forloop.counter }}</span><span class="pub-program-audience">{{ p.audience }}</span></div>
+      <h2>{{ p.title }}</h2>
+      <dl class="pub-program-meta">
+        <div><dt><i class="fas fa-location-dot" aria-hidden="true"></i> Формат</dt><dd>{{ p.format }}</dd></div>
+        <div><dt><i class="fas fa-clock" aria-hidden="true"></i> Продолжительность</dt><dd>{{ p.duration }}</dd></div>
+      </dl>
+    </article>
+    {% endfor %}
+  </div>
+  <div class="pub-source-note"><i class="fas fa-circle-info" aria-hidden="true"></i><p>Каталог помогает сориентироваться в программах. Актуальность набора, сроки, формат и стоимость уточняйте на <a href="https://cs.msu.ru/" target="_blank" rel="noopener">официальном сайте факультета</a> и в <a href="https://vmk-edu.ru/" target="_blank" rel="noopener">Учебном центре ВМК</a>.</p></div>
+  <section class="pub-bottom-band">
+    <div><span class="pub-kicker">Следующий шаг</span><h2>Планируете поступать?</h2><p>Собрали официальные источники и ориентиры по поступлению на факультет.</p></div>
+    <a class="ds-btn ds-btn-primary" href="{% url 'abiturient' %}">Абитуриенту <i class="fas fa-arrow-right" aria-hidden="true"></i></a>
+  </section>
+</div>
+{% endblock %}

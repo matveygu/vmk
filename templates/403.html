@@ -1,0 +1,15 @@
+{% extends 'ds_base.html' %}
+{% load static %}
+
+{% block title %}Доступ запрещён — Учебный портал МГУ{% endblock %}
+
+{% block content %}
+<div class="ds-card">
+  <div class="ds-empty">
+    <i class="fas fa-lock"></i>
+    <span class="ds-empty-title">Доступ запрещён</span>
+    <span class="ds-empty-desc">{{ exception|default:'У вас недостаточно прав для просмотра этой страницы.' }}</span>
+    <a href="{% url 'home' %}" class="ds-btn ds-btn-primary"><i class="fas fa-house"></i> На главную</a>
+  </div>
+</div>
+{% endblock %}

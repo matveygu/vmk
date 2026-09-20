@@ -1,0 +1,15 @@
+{% extends 'admin_base.html' %}
+{% block title %}Изменить пользователя — Портал ВМК МГУ{% endblock %}
+{% block admin_content %}
+<div class="ds-page-header"><div><span class="ds-eyebrow">Пользователи</span><h1>Изменить пользователя</h1><p>{{ target_user.student_id }} · {{ target_user.name|default:'Имя не указано' }}</p></div><a href="{{ back_url }}" class="ds-btn ds-btn-secondary">К списку</a></div>
+<div class="study-editor-layout">
+  <section class="ds-card study-editor">
+    <form method="post" class="study-form-stack">{% csrf_token %}<input type="hidden" name="return_query" value="{{ return_query }}">
+      {% for error in form.non_field_errors %}<div class="ds-alert ds-alert-error" role="alert">{{ error }}</div>{% endfor %}
+      {% for field in form %}<div class="ds-field">{{ field.label_tag }}{{ field }}{% if field.help_text %}<p class="study-form-help" id="{{ field.auto_id }}_helptext">{{ field.help_text }}</p>{% endif %}{% for error in field.errors %}<p class="study-form-error" id="{{ field.auto_id }}_error">{{ error }}</p>{% endfor %}</div>{% endfor %}
+      <div class="study-form-actions"><button class="ds-btn ds-btn-primary" type="submit">Сохранить изменения</button><a class="ds-btn ds-btn-secondary" href="{{ back_url }}">Отмена</a></div>
+    </form>
+  </section>
+  <aside class="study-editor-aside"><i class="fas fa-user-shield" aria-hidden="true"></i><h3>Доступ к порталу</h3><p>Роль определяет доступные пользователю действия. При смене группы обновляются факультет и курс.</p><p>Пароль и номер студенческого эта форма не изменяет.</p></aside>
+</div>
+{% endblock %}

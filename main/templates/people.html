@@ -1,0 +1,47 @@
+{% extends 'ds_base.html' %}
+{% block title %}Люди — Учебный портал ВМК МГУ{% endblock %}
+{% block content %}
+<div class="ds-page-header ws-page-header">
+  <div><span class="ds-eyebrow">Факультет</span><h1>Люди</h1><p>Состав учебных групп и поиск студентов, старост и преподавателей по имени.</p></div>
+</div>
+<section class="ds-card ds-card-flush ws-admin-directory" aria-label="Поиск людей">
+  <form method="get" class="ws-admin-filters">
+    <div class="ds-field"><label for="{{ filter_form.group.id_for_label }}" class="ws-visually-hidden">Группа</label>{{ filter_form.group }}</div>
+    <div class="ds-input-wrap ws-admin-search"><i class="fas fa-search leading" aria-hidden="true"></i><label for="{{ filter_form.q.id_for_label }}" class="ws-visually-hidden">Имя или студенческий</label>{{ filter_form.q }}</div>
+    <button type="submit" class="ds-btn ds-btn-secondary">Найти</button>
+    {% if own_group_id %}<a href="?group={{ own_group_id }}" class="ws-text-link">Моя группа</a>{% endif %}
+    {% if has_filters %}<a href="{% url 'people' %}" class="ws-text-link">Сбросить</a>{% endif %}
+  </form>
+  <div class="ds-table-wrap" tabindex="0" aria-label="Список людей">
+    <table class="ds-table">
+      <thead><tr><th scope="col">Пользователь</th><th scope="col">Студенческий</th><th scope="col">Роль</th><th scope="col">Группа</th><th scope="col">Курс</th></tr></thead>
+      <tbody>
+        {% for person in people %}
+        <tr>
+          <td><div class="ws-table-person"><span class="ws-table-avatar" aria-hidden="true">{{ person.name|default:person.student_id|slice:":1"|upper }}</span><strong>{{ person.name|default:person.student_id }}</strong></div></td>
+          <td class="ws-mono">{{ person.student_id }}</td>
+          <td><span class="ds-role-badge ds-role-{{ person.role }}">{{ person.get_role_display }}</span></td>
+          <td>{{ person.group.number|default:"—" }}</td>
+          <td>{{ person.course|default:"—" }}</td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="5">
+          {% if prompt_empty %}
+          <div class="ds-empty ws-empty"><span class="ws-empty-icon"><i class="fas fa-users" aria-hidden="true"></i></span><span class="ds-empty-title">Выберите группу или начните поиск</span><span class="ds-empty-desc">Введите имя, фамилию или номер студенческого либо выберите группу из списка.</span></div>
+          {% else %}
+          <div class="ds-empty ws-empty"><span class="ws-empty-icon"><i class="fas fa-magnifying-glass" aria-hidden="true"></i></span><span class="ds-empty-title">Никого не найдено</span><span class="ds-empty-desc">Проверьте запрос или выберите другую группу.</span></div>
+          {% endif %}
+        </td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% if page_obj.has_other_pages %}
+  <nav class="ds-pagination" aria-label="Страницы результатов">
+    {% if page_obj.has_previous %}<a href="?{{ filter_query }}&amp;page={{ page_obj.previous_page_number }}">Назад</a>{% endif %}
+    <span>Страница {{ page_obj.number }} из {{ page_obj.paginator.num_pages }}</span>
+    {% if page_obj.has_next %}<a href="?{{ filter_query }}&amp;page={{ page_obj.next_page_number }}">Далее</a>{% endif %}
+  </nav>
+  {% endif %}
+</section>
+{% endblock %}

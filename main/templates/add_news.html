@@ -1,0 +1,29 @@
+{% extends 'ds_base.html' %}
+{% load static %}
+
+{% block title %}Добавить новость — Учебный портал МГУ{% endblock %}
+
+{% block extra_css %}<link rel="stylesheet" href="{% static 'css/ds/editor.css' %}">{% endblock %}
+
+{% block content %}
+<div class="ds-page-header ws-page-header">
+  <div>
+    <span class="ds-eyebrow">Новости факультета</span>
+    <h1>Добавить новость</h1>
+    <p>Объявления, события и важная информация для учебного сообщества.</p>
+  </div>
+  <div class="ds-actions"><a href="{{ next_url }}" class="ds-btn ds-btn-secondary"><i class="fas fa-arrow-left" aria-hidden="true"></i> К новостям</a></div>
+</div>
+
+<div class="news-editor-layout">
+  {% include 'partials/news_editor_form.html' with submit_label='Опубликовать' %}
+  <aside class="news-editor-aside" aria-labelledby="newsEditorHelp">
+    <span class="ws-panel-icon"><i class="far fa-lightbulb" aria-hidden="true"></i></span>
+    <h2 id="newsEditorHelp">Хорошую новость легко прочитать</h2>
+    <p>Вынесите главное в заголовок. В тексте укажите, что произойдёт, где и когда.</p>
+    <div class="news-editor-note"><h3>Выберите категорию</h3><p>Так читатели смогут найти публикацию в нужном разделе.</p></div>
+    <div class="news-editor-note"><h3>Добавьте подробности</h3><p>Программу мероприятия или документ можно прикрепить отдельным файлом.</p></div>
+    <p class="news-editor-save-note"><i class="fas fa-circle-info" aria-hidden="true"></i> Новость появится после нажатия «Опубликовать».</p>
+  </aside>
+</div>
+{% endblock %}

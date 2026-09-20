@@ -1,0 +1,20 @@
+{% extends 'ds_bare_base.html' %}
+{% load static %}
+{% block title %}{% block auth_title %}Доступ к аккаунту{% endblock %} — Учебный портал ВМК МГУ{% endblock %}
+{% block extra_css %}<link href="{% static 'css/ds/auth.css' %}?v=20260915" rel="stylesheet">{% endblock %}
+{% block content %}
+<div class="ds-auth-layout">
+  {% include 'partials/ds_auth_story.html' %}
+  <main class="ds-auth-main">
+    <div class="ds-auth-utilities">
+      <a href="{% url 'login' %}" class="ds-auth-back"><i class="fas fa-arrow-left" aria-hidden="true"></i> К входу</a>
+      <button type="button" class="ds-theme-toggle" onclick="dsToggleTheme()" aria-label="Переключить тему"><i class="fas fa-sun ds-theme-icon-sun" aria-hidden="true"></i><i class="fas fa-moon ds-theme-icon-moon" aria-hidden="true"></i></button>
+    </div>
+    <div class="ds-auth-card">
+      {% include 'registration/messages.html' %}
+      {% block auth_content %}{% endblock %}
+    </div>
+    <span class="ds-auth-caption">Учебный портал · Студенческий проект ВМК МГУ</span>
+  </main>
+</div>
+{% endblock %}

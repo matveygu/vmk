@@ -1,0 +1,13 @@
+{% extends 'admin_base.html' %}
+
+{% block title %}Удаление группы {{ group.number }} — Управление порталом{% endblock %}
+
+{% block admin_content %}
+<div class="ds-page-header"><div><span class="ds-eyebrow">Учебные группы</span><h1>Удаление группы</h1><p>Группа {{ group.number }}, {{ group.faculty }}, {{ group.course }} курс.</p></div></div>
+<section class="ds-card study-editor study-editor-sm" aria-labelledby="admGroupDeleteTitle">
+  <div class="study-editor-heading"><h2 id="admGroupDeleteTitle">{% if can_delete %}Удалить пустую группу {{ group.number }}?{% else %}В группе есть связанные данные{% endif %}</h2><p>{% if can_delete %}У группы нет участников, занятий и домашних заданий. После удаления вернуть её можно только повторным созданием.{% else %}Удалить можно только пустую группу. Сначала перенесите связанные данные в соответствующих разделах портала.{% endif %}</p></div>
+  {% if deletion_error %}<div class="ds-alert ds-alert-danger" role="alert">{{ deletion_error }}</div>{% endif %}
+  <dl class="adm-group-relations"><div><dt>Участников</dt><dd>{{ related.members }}</dd></div><div><dt>Занятий</dt><dd>{{ related.lessons }}</dd></div><div><dt>Домашних заданий</dt><dd>{{ related.homework }}</dd></div></dl>
+  <form method="post" class="study-form-actions">{% csrf_token %}{% if can_delete %}<button type="submit" class="ds-btn ds-btn-danger"><i class="fas fa-trash-can" aria-hidden="true"></i> Удалить группу</button>{% endif %}<a href="{% url 'admin_groups' %}" class="ds-btn ds-btn-secondary">{% if can_delete %}Отмена{% else %}К списку групп{% endif %}</a></form>
+</section>
+{% endblock %}

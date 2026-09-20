@@ -1,0 +1,61 @@
+/* Authentication is part of the same portal, with an editorial introduction. */
+.ds-auth-layout { min-height: 100vh; min-height: 100dvh; display: grid; grid-template-columns: minmax(340px, .9fr) minmax(480px, 1.1fr); }
+.ds-auth-story { padding: 44px clamp(32px, 5vw, 80px); background: #173c70; color: #fff; display: flex; flex-direction: column; justify-content: space-between; gap: 64px; }
+.ds-auth-story .ds-wordmark-main { color: #fff; }
+.ds-auth-story .ds-wordmark-sub { color: #bacbe2; }
+.ds-auth-story .ds-brand-sign { color: #173c70; background: #fff; }
+.ds-auth-story-content { max-width: 480px; }
+.ds-auth-story .ds-eyebrow { color: #b5d3ff; margin-bottom: 24px; }
+.ds-auth-story h2 { font-family: var(--ds-font-display); font-size: clamp(2.5rem, 4.2vw, 4rem); line-height: 1.13; font-weight: 500; letter-spacing: -.04em; margin: 0 0 24px; color: #fff; }
+.ds-auth-story h2 em { color: #b9d7ff; font-weight: 400; }
+.ds-auth-story p { color: #c9d7ea; font-size: 16px; line-height: 1.8; max-width: 34ch; }
+.ds-auth-topics { margin-top: 42px; display: flex; flex-direction: column; gap: 0; }
+.ds-auth-topic { display: flex; align-items: center; gap: 18px; padding: 18px 0; border-top: 1px solid rgba(255,255,255,.15); }
+.ds-auth-topic > i { font-size: 18px; color: #bad8ff; width: 22px; text-align: center; }
+.ds-auth-topic div { display: flex; flex-direction: column; gap: 3px; }
+.ds-auth-topic strong { font-size: 14px; font-weight: 500; }
+.ds-auth-topic span { font-size: 13px; color: #bbcee6; }
+.ds-auth-story-footer { font-size: 12px; color: #b8c9df; border-top: 1px solid rgba(255,255,255,.15); padding-top: 20px; }
+.ds-auth-main { padding: 28px 40px; display: flex; align-items: center; flex-direction: column; gap: 40px; background: var(--ds-surface-card); }
+.ds-auth-utilities { display: flex; justify-content: space-between; align-items: center; width: 100%; }
+.ds-auth-back { display: inline-flex; align-items: center; gap: 10px; color: var(--ds-text-muted) !important; text-decoration: none; font-size: 14px; min-height: 40px; }
+.ds-auth-back:hover { color: var(--ds-text-link) !important; }
+.ds-auth-card { width: 100%; max-width: 390px; margin-block: auto; padding: 24px 0; }
+.ds-auth-head { margin-bottom: 32px; }
+.ds-auth-head h1 { font-family: var(--ds-font-ui); font-size: 30px; font-weight: 600; letter-spacing: -.045em; line-height: 1.2; color: var(--ds-text-heading); margin: 10px 0 12px; }
+.ds-auth-head p { margin: 0; font-size: 15px; color: var(--ds-text-muted); }
+.ds-auth-fields { display: flex; flex-direction: column; gap: 22px; }
+.ds-auth-fields .ds-input, .ds-auth-fields .form-control { min-height: 48px; background: var(--ds-bg-page); }
+.ds-auth-fields .ds-input-trailing { border: 0; background: transparent; }
+.ds-auth-fields .ds-btn-full { margin-top: 4px; min-height: 48px; justify-content: space-between; padding-inline: 18px; }
+.ds-auth-hint { display: flex; align-items: flex-start; gap: 9px; font-size: 13px; color: var(--ds-text-muted); margin: 22px 0 0; line-height: 1.65; }
+.ds-auth-hint i { margin-top: 4px; }
+.ds-auth-footer { padding-top: 26px; margin-top: 26px; border-top: 1px solid var(--ds-border-subtle); font-size: 14px; color: var(--ds-text-muted); }
+.ds-auth-footer a { margin-left: 4px; font-weight: 500; text-decoration: none; }
+.ds-auth-caption { font-size: 12px; color: var(--ds-text-muted); text-align: center; margin-top: auto; }
+.ds-auth-register { max-width: 480px; }
+.ds-auth-register .ds-auth-head { margin-bottom: 24px; }
+.ds-auth-register .ds-auth-fields { gap: 16px; }
+.ds-auth-form-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px 16px; }
+.ds-field-wide { grid-column: 1 / -1; }
+.ds-auth-register input[name^="password"] { padding-right: 44px; }
+.ds-auth-register .ds-field label { font-size: 13px; }
+.ds-auth-fields input[autocomplete="one-time-code"] { font-size: 26px; letter-spacing: .35em; text-align: center; font-variant-numeric: tabular-nums; }
+.ds-auth-head strong { overflow-wrap: anywhere; }
+@media (min-width: 1600px) { .ds-auth-story-content { align-self: center; } }
+@media (max-width: 1000px) {
+  .ds-auth-layout { grid-template-columns: minmax(280px, .8fr) minmax(420px, 1.2fr); }
+  .ds-auth-story { padding: 32px; }
+  .ds-auth-story h2 { font-size: 42px; }
+  .ds-auth-main { padding: 24px 32px; }
+}
+@media (max-width: 760px) {
+  .ds-auth-layout { display: flex; flex-direction: column; }
+  .ds-auth-story { padding: 22px 24px; gap: 0; }
+  .ds-auth-story-content, .ds-auth-story-footer { display: none; }
+  .ds-auth-main { flex: 1; padding: 18px 24px 28px; gap: 16px; min-height: calc(100dvh - 80px); }
+  .ds-auth-card { max-width: 460px; padding: 28px 0; }
+  .ds-auth-head h1 { font-size: 28px; }
+  .ds-auth-form-grid { grid-template-columns: 1fr; }
+  .ds-auth-fields .form-control, .ds-auth-fields .ds-input { font-size: 16px; }
+}

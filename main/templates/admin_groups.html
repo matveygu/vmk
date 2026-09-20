@@ -1,0 +1,39 @@
+{% extends 'admin_base.html' %}
+
+{% block title %}Учебные группы — Управление порталом{% endblock %}
+
+{% block admin_content %}
+<div class="ds-page-header ws-page-header">
+  <div><span class="ds-eyebrow">Учебная структура</span><h1>Группы</h1><p>Состав групп и связанные занятия. Всего групп: {{ group_count }}.</p></div>
+  <a href="{% url 'admin_group_add' %}" class="ds-btn ds-btn-primary"><i class="fas fa-plus" aria-hidden="true"></i> Добавить группу</a>
+</div>
+<section class="ds-card ds-card-flush ws-admin-directory" aria-label="Список учебных групп">
+  <form method="get" class="ws-admin-filters">
+    <div class="ds-input-wrap ws-admin-search"><label for="admGroupSearch" class="ws-visually-hidden">Номер группы или факультет</label><i class="fas fa-search leading" aria-hidden="true"></i><input type="search" name="q" value="{{ query }}" maxlength="100" id="admGroupSearch" class="ds-input with-icon" placeholder="Номер группы или факультет"></div>
+    <button type="submit" class="ds-btn ds-btn-secondary">Найти</button>
+    {% if query %}<a href="{% url 'admin_groups' %}" class="ws-text-link">Сбросить</a>{% endif %}
+  </form>
+  <div class="ds-table-wrap" tabindex="0" aria-label="Таблица групп">
+    <table class="ds-table adm-group-table">
+      <thead><tr><th scope="col">Группа</th><th scope="col">Факультет</th><th scope="col">Курс</th><th scope="col">Участников</th><th scope="col">Занятий</th><th scope="col"><span class="ws-visually-hidden">Действия</span></th></tr></thead>
+      <tbody>
+        {% for group in groups %}
+        <tr>
+          <td><a href="{% url 'admin_group_edit' group.id %}" class="ws-text-link">{{ group.number|default_if_none:"Без номера" }}</a></td><td>{{ group.faculty }}</td><td>{{ group.course }}</td><td>{{ group.member_count }}</td><td>{{ group.lesson_count }}</td>
+          <td><div class="ws-inline-actions ws-row-actions"><a href="{% url 'admin_group_edit' group.id %}" class="ds-icon-btn" aria-label="Изменить группу {{ group.number }}" title="Изменить"><i class="fas fa-pen" aria-hidden="true"></i></a><a href="{% url 'admin_group_delete' group.id %}" class="ds-icon-btn danger" aria-label="Удалить группу {{ group.number }}" title="Удаление группы"><i class="fas fa-trash-can" aria-hidden="true"></i></a></div></td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="6"><div class="ds-empty ws-empty"><span class="ws-empty-icon"><i class="fas fa-layer-group" aria-hidden="true"></i></span><span class="ds-empty-title">{% if query %}Группы не найдены{% else %}Пока нет учебных групп{% endif %}</span><span class="ds-empty-desc">{% if query %}Попробуйте другой номер или название факультета.{% else %}Добавьте группу, чтобы объединять пользователей и составлять расписание.{% endif %}</span></div></td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% if page_obj.has_other_pages %}
+  <nav class="adm-group-pagination" aria-label="Страницы групп">
+    {% if page_obj.has_previous %}<a class="ds-btn ds-btn-secondary" href="?q={{ query|urlencode }}&amp;page={{ page_obj.previous_page_number }}">Назад</a>{% endif %}
+    <span>Страница {{ page_obj.number }} из {{ page_obj.paginator.num_pages }}</span>
+    {% if page_obj.has_next %}<a class="ds-btn ds-btn-secondary" href="?q={{ query|urlencode }}&amp;page={{ page_obj.next_page_number }}">Далее</a>{% endif %}
+  </nav>
+  {% endif %}
+</section>
+{% endblock %}

@@ -1,0 +1,27 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="ru" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#173c70">
+    <title>{% block title %}Учебный портал ВМК МГУ{% endblock %}</title>
+    <link rel="icon" type="image/png" href="{% static 'images/favicon.png' %}">
+    {% include 'partials/ds_theme_init.html' %}
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+    <link href="{% static 'css/ds/tokens.css' %}?v=20260912-3" rel="stylesheet">
+    <link href="{% static 'css/ds/chrome.css' %}?v=20260912-3" rel="stylesheet">
+    <link href="{% static 'css/ds/departments.css' %}?v=20260912-3" rel="stylesheet">
+    <link href="{% static 'css/ds/components.css' %}?v=20260912-3" rel="stylesheet">
+    <link href="{% static 'css/ds/refinement.css' %}?v=20260912-3" rel="stylesheet">
+    <link href="{% static 'css/ds/shell.css' %}?v=20260912-3" rel="stylesheet">
+    {% block extra_css %}{% endblock %}
+</head>
+<body class="ds-scope ds-auth" id="dsBody">
+    {% block content %}{% endblock %}
+    <script src="{% static 'js/portal.js' %}?v=20260912-3"></script>
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

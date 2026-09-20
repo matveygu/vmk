@@ -1,0 +1,65 @@
+{% extends 'ds_base.html' %}
+
+{% block title %}ВМК МГУ — Учебный портал{% endblock %}
+
+{% block content %}
+<div class="pub-page pub-landing">
+  <section class="pub-hero" aria-labelledby="faculty-title">
+    <div class="pub-hero-copy">
+      <span class="pub-kicker">МГУ имени М. В. Ломоносова · ВМК</span>
+      <h1 id="faculty-title">Вычислительная<br>математика<br><span>и кибернетика</span></h1>
+      <p class="pub-hero-description">Факультет, люди и учёба. Расписание, материалы и новости — в одном пространстве.</p>
+      <a class="pub-text-link" href="{% url 'department_list' %}">Познакомиться с кафедрами <i class="fas fa-arrow-right" aria-hidden="true"></i></a>
+    </div>
+    <aside class="pub-portal-card">
+      <span class="pub-kicker">Студентам и преподавателям</span>
+      <div class="pub-portal-icon"><i class="fas fa-book-open" aria-hidden="true"></i></div>
+      <h2>Ваш учебный<br>день начинается здесь</h2>
+      <p>Домашние задания, материалы курсов и новости вашей группы.</p>
+      <a href="{% url 'login' %}" class="ds-btn pub-login-btn">Войти в портал <i class="fas fa-arrow-right" aria-hidden="true"></i></a>
+      <a href="{% url 'public_schedule' %}" class="pub-portal-schedule"><i class="fas fa-calendar-days" aria-hidden="true"></i> Расписание без входа <i class="fas fa-arrow-up-right-from-square" aria-hidden="true"></i></a>
+      <span class="pub-project-note">Неофициальный студенческий проект</span>
+    </aside>
+  </section>
+
+  <nav class="pub-quick-grid" aria-label="Быстрый доступ">
+    <a class="pub-quick-card" href="{% url 'department_list' %}">
+      <span class="pub-quick-icon"><i class="fas fa-building-columns" aria-hidden="true"></i></span>
+      <span><strong>Кафедры факультета</strong><small>{{ department_count }} в каталоге · направления и преподаватели</small></span>
+      <i class="fas fa-arrow-right" aria-hidden="true"></i>
+    </a>
+    <a class="pub-quick-card" href="{% url 'abiturient' %}">
+      <span class="pub-quick-icon"><i class="fas fa-user-graduate" aria-hidden="true"></i></span>
+      <span><strong>Поступление на ВМК</strong><small>Ориентиры для будущих студентов</small></span>
+      <i class="fas fa-arrow-right" aria-hidden="true"></i>
+    </a>
+    <a class="pub-quick-card" href="{% url 'programs' %}">
+      <span class="pub-quick-icon"><i class="fas fa-graduation-cap" aria-hidden="true"></i></span>
+      <span><strong>Дополнительное образование</strong><small>Курсы для учёбы и профессионального роста</small></span>
+      <i class="fas fa-arrow-right" aria-hidden="true"></i>
+    </a>
+  </nav>
+
+  <section class="pub-education" aria-labelledby="education-title">
+    <div class="pub-section-heading">
+      <span class="pub-kicker">Образование</span>
+      <h2 id="education-title">Выберите свой путь</h2>
+      <p>От знакомства с факультетом до выбора научного направления.</p>
+      <a class="pub-text-link" href="https://cs.msu.ru/" target="_blank" rel="noopener">Официальный сайт ВМК <i class="fas fa-arrow-up-right-from-square" aria-hidden="true"></i></a>
+    </div>
+    <div class="pub-education-list">
+      {% for title, desc in programs %}
+      <div class="pub-education-row">
+        <span class="pub-row-index">0{{ forloop.counter }}</span>
+        <div><h3>{{ title }}</h3><p>{{ desc }}</p></div>
+      </div>
+      {% endfor %}
+    </div>
+  </section>
+
+  <section class="pub-bottom-band" aria-label="О портале">
+    <div><span class="pub-kicker">Сделано для сообщества</span><h2>Меньше поисков. Больше времени на учёбу.</h2><p>Сохраните расписание под рукой, находите нужные материалы и следите за новостями группы.</p></div>
+    <a href="{% url 'login' %}" class="ds-btn ds-btn-primary">Перейти в личный кабинет <i class="fas fa-arrow-right" aria-hidden="true"></i></a>
+  </section>
+</div>
+{% endblock %}

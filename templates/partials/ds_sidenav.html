@@ -1,0 +1,56 @@
+<div class="ds-scrim" onclick="dsCloseSidenav()" aria-hidden="true"></div>
+<nav class="ds-sidenav" id="dsSidenav" aria-label="{% if user.is_authenticated %}Личный кабинет{% else %}Разделы портала{% endif %}">
+  <div class="ds-sidenav-head">
+    <a class="ds-wordmark" href="{% url 'home' %}">
+      <span class="ds-brand-sign" aria-hidden="true">вмк.</span>
+      <span class="ds-brand-copy"><span class="ds-wordmark-main">Учебный портал</span><span class="ds-wordmark-sub">ВМК МГУ</span></span>
+    </a>
+    <button type="button" class="ds-sidenav-close" onclick="dsCloseSidenav()" aria-label="Закрыть меню"><i class="fas fa-xmark" aria-hidden="true"></i></button>
+  </div>
+  <div class="ds-sidenav-body">
+    {% if user.is_authenticated %}
+    <div>
+      <span class="ds-sidenav-group-label">Моя учёба</span>
+      <a class="ds-sidenav-item{% if request.resolver_match.url_name == 'home' %} active{% endif %}" href="{% url 'home' %}"><i class="fas fa-house" aria-hidden="true"></i> Главная</a>
+      <a class="ds-sidenav-item{% if request.resolver_match.app_name != 'admin' and request.path|slice:':10' == '/schedule/' %} active{% endif %}" href="{% url 'schedule' %}"><i class="fas fa-calendar-days" aria-hidden="true"></i> Расписание</a>
+      <a class="ds-sidenav-item{% if request.resolver_match.url_name == 'homework_list' %} active{% endif %}" href="{% url 'homework_list' %}"><i class="fas fa-list-check" aria-hidden="true"></i> Домашние задания</a>
+      <a class="ds-sidenav-item{% if request.path|slice:':11' == '/materials/' %} active{% endif %}" href="{% url 'materials_drive_root' %}"><i class="fas fa-folder-open" aria-hidden="true"></i> Материалы</a>
+    </div>
+    <div>
+      <span class="ds-sidenav-group-label">Факультет</span>
+      <a class="ds-sidenav-item{% if request.path|slice:':6' == '/news/' %} active{% endif %}" href="{% url 'news_list' %}"><i class="fas fa-newspaper" aria-hidden="true"></i> Новости и события</a>
+      <a class="ds-sidenav-item{% if request.resolver_match.url_name == 'people' %} active{% endif %}" href="{% url 'people' %}"><i class="fas fa-users" aria-hidden="true"></i> Люди</a>
+      <a class="ds-sidenav-item{% if 'department' in request.resolver_match.url_name %} active{% endif %}" href="{% url 'department_list' %}"><i class="fas fa-sitemap" aria-hidden="true"></i> Кафедры</a>
+      <a class="ds-sidenav-item{% if request.resolver_match.url_name == 'programs' %} active{% endif %}" href="{% url 'programs' %}"><i class="fas fa-graduation-cap" aria-hidden="true"></i> Доп. образование</a>
+    </div>
+    <div>
+      <span class="ds-sidenav-group-label">Аккаунт</span>
+      <a class="ds-sidenav-item{% if request.path|slice:':9' == '/profile/' %} active{% endif %}" href="{% url 'profile' %}"><i class="fas fa-user" aria-hidden="true"></i> Мой профиль</a>
+      {% if user.role == 'admin' %}
+      <a class="ds-sidenav-item{% if request.path|slice:':13' == '/admin-panel/' %} active{% endif %}" href="{% url 'admin_panel' %}"><i class="fas fa-shield-halved" aria-hidden="true"></i> Администрирование</a>
+      {% endif %}
+    </div>
+    {% else %}
+    <div>
+      <span class="ds-sidenav-group-label">Знакомство с ВМК</span>
+      <a class="ds-sidenav-item{% if request.resolver_match.url_name == 'home' %} active{% endif %}" href="{% url 'home' %}"><i class="fas fa-building-columns" aria-hidden="true"></i> О факультете</a>
+      <a class="ds-sidenav-item{% if 'department' in request.resolver_match.url_name %} active{% endif %}" href="{% url 'department_list' %}"><i class="fas fa-sitemap" aria-hidden="true"></i> Кафедры</a>
+      <a class="ds-sidenav-item{% if request.resolver_match.url_name == 'abiturient' %} active{% endif %}" href="{% url 'abiturient' %}"><i class="fas fa-user-graduate" aria-hidden="true"></i> Абитуриенту</a>
+      <a class="ds-sidenav-item{% if request.resolver_match.url_name == 'programs' %} active{% endif %}" href="{% url 'programs' %}"><i class="fas fa-graduation-cap" aria-hidden="true"></i> Доп. образование</a>
+    </div>
+    <div>
+      <span class="ds-sidenav-group-label">Учёба</span>
+      <a class="ds-sidenav-item{% if request.resolver_match.url_name == 'public_schedule' %} active{% endif %}" href="{% url 'public_schedule' %}"><i class="fas fa-calendar-days" aria-hidden="true"></i> Открытое расписание</a>
+      <a class="ds-sidenav-item" href="{% url 'login' %}"><i class="fas fa-user" aria-hidden="true"></i> Личный кабинет</a>
+    </div>
+    {% endif %}
+  </div>
+  <div class="ds-sidenav-footer">
+    <div class="ds-sidebar-note">Факультет ВМК<br>МГУ имени М. В. Ломоносова</div>
+    {% if user.is_authenticated %}
+    <form method="post" action="{% url 'logout' %}">{% csrf_token %}
+      <button type="submit" class="ds-sidenav-logout"><i class="fas fa-arrow-right-from-bracket" aria-hidden="true"></i> Выйти из аккаунта</button>
+    </form>
+    {% else %}<a href="{% url 'login' %}" class="ds-btn ds-btn-primary ds-btn-full"><i class="fas fa-right-to-bracket" aria-hidden="true"></i> Личный кабинет</a>{% endif %}
+  </div>
+</nav>

@@ -1,0 +1,241 @@
+{% extends 'ds_base.html' %}
+{% load static %}
+
+{% block title %}{{ material.name }} — Учебный портал МГУ{% endblock %}
+
+{% block content %}
+<div class="ds-page-header study-material-heading">
+  <div>
+    <span class="ds-eyebrow">Учебные материалы</span>
+    <h1>
+      {% if media_type == 'video' %}<i class="fas fa-video ds-file-video" aria-hidden="true"></i>
+      {% elif media_type == 'audio' %}<i class="fas fa-music ds-file-audio" aria-hidden="true"></i>
+      {% elif media_type == 'image' %}<i class="fas fa-image ds-file-image" aria-hidden="true"></i>
+      {% elif media_type == 'document' %}<i class="fas fa-file-pdf ds-file-document" aria-hidden="true"></i>
+      {% else %}<i class="fas fa-file ds-file-other" aria-hidden="true"></i>{% endif %}
+      {{ material.name }}
+    </h1>
+    <p>Просмотр файла и всё необходимое для работы с ним.</p>
+  </div>
+  <div class="ds-actions">
+    <a href="{% url 'download_material' material.id %}" class="ds-btn ds-btn-primary"><i class="fas fa-download" aria-hidden="true"></i> Скачать файл</a>
+  </div>
+</div>
+
+<nav class="ds-breadcrumb study-material-breadcrumb" aria-label="Путь к материалу">
+  <a href="{% url 'materials_drive_root' %}">Материалы</a>
+  {% if material.folder %}<i class="fas fa-chevron-right" aria-hidden="true"></i><a href="{% url 'materials_drive_folder' material.folder.id %}">{{ material.folder.name }}</a>{% endif %}
+  <i class="fas fa-chevron-right" aria-hidden="true"></i><span aria-current="page">Просмотр файла</span>
+</nav>
+
+<div class="ds-card study-material-details">
+  <span><i class="fas fa-file-lines" aria-hidden="true"></i> {{ material.get_type_display }}</span>
+  <span><i class="fas fa-user" aria-hidden="true"></i> {{ material.uploaded_by.name|default:"Автор не указан" }}</span>
+  <span><i class="fas fa-calendar" aria-hidden="true"></i> {{ material.upload_date|date:"j E Y" }}</span>
+</div>
+
+{% if media_type == 'video' %}
+<div class="ds-media-box study-media">
+  <video id="material-video" controls preload="metadata" aria-label="{{ material.name }}">
+    <source src="{{ file_url }}">
+    <p>Ваш браузер не поддерживает видео. <a href="{% url 'download_material' material.id %}">Скачайте файл</a>, чтобы открыть его в видеоплеере.</p>
+  </video>
+</div>
+
+{% elif media_type == 'audio' %}
+<div class="ds-audio-box study-media study-audio-player">
+  <div class="study-audio-art" aria-hidden="true"><i class="fas fa-wave-square"></i></div>
+  <div class="study-audio-title">{{ material.name }}</div>
+  <p class="study-preview-notice-desc">Аудиоматериал</p>
+  <audio controls preload="metadata" aria-label="{{ material.name }}">
+    <source src="{{ file_url }}">
+    Ваш браузер не поддерживает аудио. <a href="{% url 'download_material' material.id %}">Скачайте файл</a> для прослушивания.
+  </audio>
+</div>
+
+{% elif media_type == 'image' %}
+<div class="ds-image-box study-media study-image-preview"><img src="{{ file_url }}" alt="{{ material.name }}"></div>
+
+{% elif media_type == 'document' and material.file.name|lower|slice:"-4:" == ".pdf" %}
+<section class="study-document-preview" aria-label="Просмотр PDF">
+  <div class="ds-pdf-toolbar study-pdf-toolbar">
+    <label for="pdf-page-num">Страница <input type="number" id="pdf-page-num" value="1" min="1" step="1" class="ds-input" disabled> <span class="study-caption">из <span id="pdf-page-count">—</span></span></label>
+    <div class="study-pdf-controls" role="group" aria-label="Навигация по страницам">
+      <button type="button" id="pdf-prev" class="ds-btn ds-btn-secondary ds-btn-sm" aria-label="Предыдущая страница" title="Предыдущая страница" disabled><i class="fas fa-arrow-left" aria-hidden="true"></i></button>
+      <button type="button" id="pdf-next" class="ds-btn ds-btn-secondary ds-btn-sm" aria-label="Следующая страница" title="Следующая страница" disabled><i class="fas fa-arrow-right" aria-hidden="true"></i></button>
+    </div>
+    <div class="study-pdf-controls study-pdf-zoom" role="group" aria-label="Масштаб документа">
+      <button type="button" id="pdf-zoom-out" class="ds-btn ds-btn-secondary ds-btn-sm" aria-label="Уменьшить масштаб" title="Уменьшить масштаб" disabled><i class="fas fa-minus" aria-hidden="true"></i></button>
+      <output id="pdf-zoom-value" aria-label="Масштаб относительно ширины просмотра">100%</output>
+      <button type="button" id="pdf-zoom-in" class="ds-btn ds-btn-secondary ds-btn-sm" aria-label="Увеличить масштаб" title="Увеличить масштаб" disabled><i class="fas fa-plus" aria-hidden="true"></i></button>
+    </div>
+  </div>
+  <div class="ds-pdf-viewer study-pdf-viewer" id="pdf-viewer" aria-busy="true">
+    <div id="pdf-loading" class="study-pdf-loading">
+      <p class="study-caption">Загружаем документ…</p>
+      <div class="ds-skeleton study-pdf-skeleton" aria-hidden="true"></div>
+    </div>
+    <div class="ds-alert ds-alert-info study-pdf-error" id="pdf-error" role="alert" hidden>
+      <i class="fas fa-circle-info" aria-hidden="true"></i>
+      <div><p class="study-preview-notice-title">Не удалось открыть документ</p><p class="study-preview-notice-desc">Скачайте PDF и откройте его на устройстве.</p><a href="{% url 'download_material' material.id %}" class="study-text-link">Скачать PDF <i class="fas fa-arrow-down" aria-hidden="true"></i></a></div>
+    </div>
+    <canvas id="pdf-canvas" data-file-url="{{ file_url }}" aria-label="Страница документа" hidden></canvas>
+    <noscript><p>Для просмотра PDF включите JavaScript или <a href="{% url 'download_material' material.id %}">скачайте документ</a>.</p></noscript>
+  </div>
+  <p id="pdf-status" class="study-caption study-pdf-status" role="status" aria-live="polite">Загрузка PDF…</p>
+</section>
+
+{% elif media_type == 'document' %}
+<div class="ds-card ds-djvu-notice study-preview-notice">
+  <i class="fas fa-file-lines" aria-hidden="true"></i>
+  <p class="study-preview-notice-title">Документ DJVU</p>
+  <p class="study-preview-notice-desc">Скачайте файл, чтобы открыть его в приложении для чтения DJVU.</p>
+</div>
+
+{% elif media_type == 'text' %}
+{% if text_truncated %}<p class="ds-alert ds-alert-info">Показан только первый 1 МиБ текста. Чтобы прочитать файл целиком, скачайте его.</p>{% endif %}
+<div class="ds-text-viewer study-text-preview" tabindex="0" role="region" aria-label="Содержимое файла">{{ text_content|default_if_none:"Не удалось прочитать файл. Скачайте его для просмотра." }}</div>
+
+{% else %}
+<div class="ds-card ds-djvu-notice study-preview-notice">
+  <i class="fas fa-file-arrow-down" aria-hidden="true"></i>
+  <p class="study-preview-notice-title">Файл готов к скачиванию</p>
+  <p class="study-preview-notice-desc">Для этого формата нет предпросмотра. Откройте файл в подходящем приложении.</p>
+</div>
+{% endif %}
+
+<div class="study-material-bottom">
+  <a href="{% if material.folder %}{% url 'materials_drive_folder' material.folder.id %}{% else %}{% url 'materials_drive_root' %}{% endif %}" class="ds-btn ds-btn-secondary"><i class="fas fa-arrow-left" aria-hidden="true"></i> {% if material.folder %}Вернуться в папку{% else %}К материалам{% endif %}</a>
+  <span class="study-caption">Скачанный файл можно открыть без доступа к порталу.</span>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+{% if media_type == 'document' and material.file.name|lower|slice:"-4:" == ".pdf" %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script>
+(() => {
+  const canvas = document.getElementById('pdf-canvas');
+  const viewer = document.getElementById('pdf-viewer');
+  const loading = document.getElementById('pdf-loading');
+  const error = document.getElementById('pdf-error');
+  const status = document.getElementById('pdf-status');
+  const pageNum = document.getElementById('pdf-page-num');
+  const pageCount = document.getElementById('pdf-page-count');
+  const prevBtn = document.getElementById('pdf-prev');
+  const nextBtn = document.getElementById('pdf-next');
+  const zoomInBtn = document.getElementById('pdf-zoom-in');
+  const zoomOutBtn = document.getElementById('pdf-zoom-out');
+  const zoomValue = document.getElementById('pdf-zoom-value');
+  let currentPage = 1, zoom = 1, pdfDoc = null, rendering = false, pending = false, failed = false;
+
+  function showError() {
+    failed = true;
+    pending = false;
+    loading.hidden = true;
+    canvas.hidden = true;
+    error.hidden = false;
+    viewer.setAttribute('aria-busy', 'false');
+    status.textContent = 'Предпросмотр недоступен. Вы можете скачать файл.';
+    [pageNum, prevBtn, nextBtn, zoomInBtn, zoomOutBtn].forEach(control => { control.disabled = true; });
+  }
+
+  if (!window.pdfjsLib) {
+    showError();
+    return;
+  }
+  const context = canvas.getContext('2d');
+  if (!context) {
+    showError();
+    return;
+  }
+  window.pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+
+  function updateControls() {
+    pageNum.value = currentPage;
+    pageNum.disabled = false;
+    prevBtn.disabled = currentPage <= 1;
+    nextBtn.disabled = currentPage >= pdfDoc.numPages;
+    zoomOutBtn.disabled = zoom <= 0.5;
+    zoomInBtn.disabled = zoom >= 2;
+    zoomValue.textContent = `${Math.round(zoom * 100)}%`;
+  }
+
+  async function renderLatest() {
+    if (rendering || !pdfDoc || failed) return;
+    rendering = true;
+    viewer.setAttribute('aria-busy', 'true');
+    try {
+      // Finish each canvas render before applying the latest requested page or zoom.
+      while (pending && !failed) {
+        pending = false;
+        const pageNumber = currentPage;
+        const pageZoom = zoom;
+        canvas.hidden = true;
+        loading.hidden = false;
+        status.textContent = `Открываем страницу ${pageNumber}…`;
+        const page = await pdfDoc.getPage(pageNumber);
+        const naturalViewport = page.getViewport({ scale: 1 });
+        const fitScale = Math.min(1.5, Math.max(1, viewer.clientWidth - 34) / naturalViewport.width);
+        const viewport = page.getViewport({ scale: fitScale * pageZoom });
+        canvas.width = Math.ceil(viewport.width);
+        canvas.height = Math.ceil(viewport.height);
+        await page.render({ canvasContext: context, viewport }).promise;
+        if (!pending) {
+          canvas.setAttribute('aria-label', `Страница ${pageNumber} из ${pdfDoc.numPages}. Для чтения текста скачайте PDF.`);
+          canvas.hidden = false;
+          loading.hidden = true;
+          status.textContent = `Страница ${pageNumber} из ${pdfDoc.numPages}. Масштаб ${Math.round(pageZoom * 100)}%.`;
+        }
+      }
+    } catch (_) {
+      showError();
+    } finally {
+      rendering = false;
+      viewer.setAttribute('aria-busy', 'false');
+    }
+  }
+
+  function requestRender() {
+    if (!pdfDoc || failed) return;
+    updateControls();
+    pending = true;
+    renderLatest();
+  }
+
+  pageNum.addEventListener('change', () => {
+    const page = Number(pageNum.value);
+    if (pdfDoc && Number.isInteger(page) && page >= 1 && page <= pdfDoc.numPages) {
+      currentPage = page;
+      requestRender();
+    } else {
+      pageNum.value = currentPage;
+    }
+  });
+  prevBtn.addEventListener('click', () => {
+    if (currentPage > 1) { currentPage--; requestRender(); }
+  });
+  nextBtn.addEventListener('click', () => {
+    if (pdfDoc && currentPage < pdfDoc.numPages) { currentPage++; requestRender(); }
+  });
+  zoomInBtn.addEventListener('click', () => {
+    if (zoom < 2) { zoom += 0.25; requestRender(); }
+  });
+  zoomOutBtn.addEventListener('click', () => {
+    if (zoom > 0.5) { zoom -= 0.25; requestRender(); }
+  });
+
+  (async () => {
+    try {
+      pdfDoc = await window.pdfjsLib.getDocument({ url: canvas.dataset.fileUrl, isEvalSupported: false }).promise;
+      pageCount.textContent = pdfDoc.numPages;
+      pageNum.max = pdfDoc.numPages;
+      requestRender();
+    } catch (_) {
+      showError();
+    }
+  })();
+})();
+</script>
+{% endif %}
+{% endblock %}

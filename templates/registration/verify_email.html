@@ -1,0 +1,15 @@
+{% extends 'registration/base.html' %}
+{% block auth_title %}Подтверждение email{% endblock %}
+{% block auth_content %}
+<div class="ds-auth-head"><span class="ds-eyebrow">Последний шаг</span><h1>Проверьте почту</h1><p>Введите код, отправленный на <strong>{{ email }}</strong>.</p></div>
+<form method="post" class="ds-auth-fields">
+  {% csrf_token %}{% include 'registration/fields.html' %}
+  <span class="ds-field-help">Код действует 10 минут. Доступно 5 попыток ввода.</span>
+  <button class="ds-btn ds-btn-primary ds-btn-full" type="submit">Подтвердить email <i class="fas fa-check" aria-hidden="true"></i></button>
+</form>
+<p class="ds-auth-hint">Письма нет? Проверьте папку «Спам». Повторная отправка доступна через минуту.</p>
+<div class="ds-auth-footer">
+  <form method="post" action="{% url 'resend_verification_code' %}">{% csrf_token %}<button type="submit" class="ds-btn ds-btn-secondary ds-btn-full">Отправить новый код</button></form>
+  <form method="post" action="{% url 'cancel_signup' %}" class="ds-auth-hint">{% csrf_token %}<button type="submit" class="ds-btn ds-btn-ghost">Исправить email или данные</button></form>
+</div>
+{% endblock %}

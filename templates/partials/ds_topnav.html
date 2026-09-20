@@ -1,0 +1,49 @@
+<header class="ds-topnav">
+  <button type="button" id="dsMenuToggle" class="ds-topnav-menu-btn" onclick="dsToggleSidenav()" aria-controls="dsSidenav" aria-expanded="false" aria-label="Открыть меню">
+    <i class="fas fa-bars" aria-hidden="true"></i>
+  </button>
+  <a class="ds-wordmark" href="{% url 'home' %}" aria-label="ВМК МГУ — главная">
+    <span class="ds-brand-sign" aria-hidden="true">вмк.</span>
+    <span class="ds-brand-copy">
+      <span class="ds-wordmark-main">Учебный портал</span>
+      <span class="ds-wordmark-sub">МГУ имени М. В. Ломоносова</span>
+    </span>
+  </a>
+  {% if user.is_authenticated %}
+  <div class="ds-topnav-context">
+    <span>Факультет вычислительной математики и кибернетики</span>
+    <small>Личный кабинет{% if user.group %} · Группа {{ user.group.number }}{% endif %}</small>
+  </div>
+  {% else %}<span class="ds-topnav-spacer"></span>{% endif %}
+  <button type="button" class="ds-theme-toggle" onclick="dsToggleTheme()" title="Переключить тему" aria-label="Переключить тему">
+    <i class="fas fa-sun ds-theme-icon-sun" aria-hidden="true"></i>
+    <i class="fas fa-moon ds-theme-icon-moon" aria-hidden="true"></i>
+  </button>
+  {% if user.is_authenticated %}
+  <div class="ds-user-pill" id="dsUserPill">
+    <button type="button" class="ds-user-pill-btn" onclick="dsToggleUserMenu()" aria-expanded="false" aria-controls="dsUserDropdown" aria-label="Меню профиля">
+      {% if user.photo %}
+      <img src="{{ user.photo.url }}" class="ds-user-pill-avatar" alt="">
+      {% else %}
+      <span class="ds-user-pill-avatar">{{ user.name|default:user.student_id|slice:":1"|upper }}</span>
+      {% endif %}
+      <span class="ds-user-pill-name">{{ user.name|default:user.student_id }}</span>
+      <i class="fas fa-chevron-down" aria-hidden="true"></i>
+    </button>
+    <div class="ds-user-pill-dropdown" id="dsUserDropdown">
+      <div class="head">{{ user.get_role_display }}{% if user.group %} · {{ user.group.number }}{% endif %}</div>
+      <a href="{% url 'profile' %}"><i class="fas fa-user" aria-hidden="true"></i> Профиль</a>
+      <a href="{% url 'edit_profile' %}"><i class="fas fa-sliders" aria-hidden="true"></i> Настройки</a>
+      {% if user.role == 'admin' %}
+      <a href="{% url 'admin_panel' %}"><i class="fas fa-cog" aria-hidden="true"></i> Администрирование</a>
+      {% endif %}
+      <form method="post" action="{% url 'logout' %}">
+        {% csrf_token %}
+        <button type="submit" class="danger"><i class="fas fa-arrow-right-from-bracket" aria-hidden="true"></i> Выйти</button>
+      </form>
+    </div>
+  </div>
+  {% else %}
+  <a class="ds-btn-login ds-login-icon" href="{% url 'login' %}" aria-label="Войти в личный кабинет" title="Войти в личный кабинет"><i class="fas fa-right-to-bracket" aria-hidden="true"></i></a>
+  {% endif %}
+</header>

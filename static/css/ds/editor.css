@@ -1,0 +1,54 @@
+/* Scoped publication editor, shared by create and edit news. */
+.ds-scope .news-editor-layout { display: grid; grid-template-columns: minmax(0, 760px) minmax(210px, 1fr); gap: 32px; align-items: start; }
+.ds-scope .news-editor { min-width: 0; margin: 0; padding: 28px; }
+.ds-scope .news-editor-heading { padding-bottom: 22px; margin-bottom: 24px; border-bottom: 1px solid var(--ds-border-subtle); }
+.ds-scope .news-editor-fields { display: grid; gap: 24px; }
+.ds-scope .news-editor .ds-field { min-width: 0; gap: 8px; }
+.ds-scope .news-editor .ds-field > label { font-size: 13px; font-weight: 600; line-height: 1.5; }
+.ds-scope .news-editor .ds-input, .ds-scope .news-editor .ds-select, .ds-scope .news-editor .ds-textarea { min-width: 0; font-size: 14px; line-height: 1.6; border-radius: 10px; }
+.ds-scope .news-editor .ds-input, .ds-scope .news-editor .ds-select { min-height: 44px; }
+.ds-scope .news-editor .ds-textarea { min-height: 190px; resize: vertical; padding: 13px 15px; }
+.ds-scope .news-editor .ws-field-hint, .ds-scope .news-editor .ws-field-error { font-size: 12px; line-height: 1.65; }
+.ds-scope .news-editor-category { max-width: 320px; }
+.ds-scope .news-editor-attachment { padding: 18px; border: 1px solid var(--ds-border-subtle); border-radius: 12px; background: var(--ds-surface-sunken); }
+.ds-scope .news-editor-attachment > label > i { margin-right: 4px; color: var(--ds-text-muted); }
+.ds-scope .news-editor-optional { margin-left: 6px; color: var(--ds-text-muted); font-size: 12px; font-weight: 400; }
+.ds-scope .news-editor-file-widget { color: var(--ds-text-body); font-size: 14px; line-height: 1.9; overflow-wrap: anywhere; }
+.ds-scope .news-editor-file-widget input[type="file"] { width: 100%; max-width: 100%; margin-top: 6px; background: var(--ds-surface-card); }
+.ds-scope .news-editor-file-widget input[type="file"]::file-selector-button { border: 0; border-radius: 6px; padding: 6px 10px; margin-right: 10px; background: var(--ds-brand-primary-soft); color: var(--ds-brand-primary); font: 500 12px/1.5 var(--ds-font-ui); cursor: pointer; }
+.ds-scope .news-editor-file-widget input[type="checkbox"] { accent-color: var(--ds-brand-primary); margin-left: 8px; }
+.ds-scope .news-editor-file-widget label { font-size: 12px; }
+.ds-scope .news-editor-actions { align-items: center; margin-top: 28px; }
+.ds-scope .news-editor-actions .ds-btn { min-height: 42px; font-size: 13px; }
+.ds-scope .news-editor-actions .news-editor-delete { margin-left: auto; color: var(--ds-error-fg); }
+.ds-scope .news-editor-actions .news-editor-delete:hover { background: var(--ds-error-bg); }
+.ds-scope .news-editor-errors { font-size: 14px; }
+.ds-scope .news-editor-errors ul { margin: 0; padding-left: 18px; }
+.ds-scope .news-editor-aside { max-width: 300px; padding: 16px 0; }
+.ds-scope .news-editor-aside h2 { margin: 16px 0 10px; color: var(--ds-text-heading); font: 600 16px/1.5 var(--ds-font-ui); }
+.ds-scope .news-editor-aside p { color: var(--ds-text-muted); font-size: 13px; line-height: 1.75; margin: 0; }
+.ds-scope .news-editor-note { margin-top: 24px; }
+.ds-scope .news-editor-note h3 { color: var(--ds-text-heading); font: 500 13px/1.5 var(--ds-font-ui); margin: 0 0 6px; }
+.ds-scope .news-editor-aside .news-editor-save-note { display: flex; align-items: flex-start; gap: 9px; margin-top: 25px; padding-top: 18px; border-top: 1px solid var(--ds-border-subtle); font-size: 12px; }
+.ds-scope .news-editor-save-note > i { flex-shrink: 0; margin-top: 4px; color: var(--ds-brand-primary); }
+.ds-scope .news-editor-delete-modal .ds-modal-body p { margin: 0; font-size: 14px; line-height: 1.7; overflow-wrap: anywhere; }
+.ds-scope .news-editor-delete-modal .ds-modal-foot { flex-wrap: wrap; }
+.ds-scope .news-editor-delete-modal form { margin: 0; }
+@media (max-width: 1100px) {
+  .ds-scope .news-editor-layout { grid-template-columns: minmax(0, 760px); gap: 22px; }
+  .ds-scope .news-editor-aside { max-width: 760px; padding: 0 4px; }
+  .ds-scope .news-editor-aside > .ws-panel-icon { display: none; }
+  .ds-scope .news-editor-aside h2 { margin-top: 0; }
+  .ds-scope .news-editor-note { margin-top: 16px; }
+}
+@media (max-width: 640px) {
+  .ds-scope .news-editor { padding: 20px; }
+  .ds-scope .news-editor-heading { padding-bottom: 18px; margin-bottom: 20px; }
+  .ds-scope .news-editor-fields { gap: 20px; }
+  .ds-scope .news-editor .ds-input, .ds-scope .news-editor .ds-select, .ds-scope .news-editor .ds-textarea { font-size: 16px; }
+  .ds-scope .news-editor .ds-textarea { min-height: 170px; }
+  .ds-scope .news-editor-category { max-width: none; }
+  .ds-scope .news-editor-attachment { padding: 14px; }
+  .ds-scope .news-editor-actions { gap: 8px; }
+  .ds-scope .news-editor-actions .news-editor-delete { margin-left: 0; }
+}

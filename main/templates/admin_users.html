@@ -1,0 +1,25 @@
+{% extends 'admin_base.html' %}
+{% block title %}Пользователи — Портал ВМК МГУ{% endblock %}
+{% block admin_content %}
+<div class="ds-page-header"><div><span class="ds-eyebrow">Управление порталом</span><h1>Пользователи</h1><p>Учётные записи, учебные группы и права доступа.</p></div>{% if user.is_staff %}<a href="{% url 'admin:main_customuser_add' %}" class="ds-btn ds-btn-primary"><i class="fas fa-user-plus" aria-hidden="true"></i> Добавить пользователя</a>{% endif %}</div>
+<section class="ds-card ds-card-flush">
+  <form method="get" id="admUserFilters" class="adm-user-filters">
+    <div class="adm-filter-toolbar"><div><h2>Все пользователи</h2><p class="study-caption">Найдено: {{ page_obj.paginator.count }} из {{ total_users }}. Фильтры по столбцам применяются вместе.</p></div><div class="adm-filter-buttons"><button type="submit" class="ds-btn ds-btn-primary"><i class="fas fa-filter" aria-hidden="true"></i> Применить</button>{% if has_filters %}<a href="{% url 'admin_users' %}" class="ds-btn ds-btn-secondary">Сбросить</a>{% endif %}</div></div>
+    {% if filter_form.q.value %}<div class="adm-legacy-search">{{ filter_form.q.label_tag }}{{ filter_form.q }}</div>{% endif %}
+    {% if filter_form.errors %}<div class="ds-alert ds-alert-error adm-filter-errors" role="alert">Проверьте фильтры: {% for field in filter_form %}{% for error in field.errors %}<span>{{ field.label }} — {{ error }}</span>{% endfor %}{% endfor %}</div>{% endif %}
+    <div class="ds-table-wrap adm-users-table-wrap" tabindex="0" aria-label="Таблица пользователей. На узком экране прокручивается по горизонтали.">
+      <table class="ds-table adm-users-table">
+        <thead><tr><th scope="col">Пользователь</th><th scope="col">Студенческий</th><th scope="col">Факультет</th><th scope="col">Курс</th><th scope="col">Группа</th><th scope="col">Роль</th><th scope="col">Статус</th><th scope="col"><span class="ws-visually-hidden">Действия</span></th></tr>
+        <tr class="adm-column-filters"><td>{{ filter_form.name }}</td><td>{{ filter_form.student_id }}</td><td>{{ filter_form.faculty }}</td><td>{{ filter_form.course }}</td><td>{{ filter_form.group }}</td><td>{{ filter_form.role }}</td><td>{{ filter_form.status }}</td><td></td></tr></thead>
+        <tbody>{% for u in users %}<tr>
+          <td><div class="ws-table-person"><span class="ws-table-avatar" aria-hidden="true">{{ u.name|default:u.student_id|slice:':1'|upper }}</span><strong>{{ u.name|default:u.student_id }}</strong></div></td><td class="ws-mono">{{ u.student_id }}</td><td>{{ u.faculty|default:'—' }}</td><td>{{ u.course }}</td><td>{{ u.group.number|default:'—' }}</td>
+          <td><span class="ds-role-badge ds-role-{{ u.role }}">{{ u.get_role_display }}</span></td><td>{% if u.is_active %}<span class="ws-status"><span class="ws-status-dot" aria-hidden="true"></span>Активный</span>{% else %}<span class="ws-status ws-status-inactive"><span class="ws-status-dot" aria-hidden="true"></span>Отключён</span>{% endif %}</td>
+          <td><div class="ws-inline-actions ws-row-actions"><a class="ds-icon-btn" href="{% url 'admin_edit_user' u.pk %}?return_query={{ return_query|urlencode }}" title="Изменить пользователя" aria-label="Изменить {{ u.name|default:u.student_id }}"><i class="fas fa-pen" aria-hidden="true"></i></a><button type="submit" form="admToggle{{ u.pk }}" class="ds-icon-btn{% if u.is_active %} danger{% endif %}"{% if u.pk == user.pk %} disabled title="Нельзя отключить свой аккаунт"{% else %} title="{% if u.is_active %}Отключить{% else %}Активировать{% endif %}"{% endif %} aria-label="{% if u.is_active %}Отключить{% else %}Активировать{% endif %} {{ u.name|default:u.student_id }}"><i class="fas {% if u.is_active %}fa-user-slash{% else %}fa-user-check{% endif %}" aria-hidden="true"></i></button></div></td>
+        </tr>{% empty %}<tr><td colspan="8"><div class="ds-empty"><i class="fas fa-magnifying-glass" aria-hidden="true"></i><span class="ds-empty-title">Пользователи не найдены</span><span class="ds-empty-desc">Измените фильтры или сбросьте их, чтобы увидеть весь список.</span></div></td></tr>{% endfor %}</tbody>
+      </table>
+    </div>
+  </form>
+  {% for u in users %}<form id="admToggle{{ u.pk }}" method="post" action="{% url 'admin_toggle_user' u.pk %}" onsubmit="return confirm('{% if u.is_active %}Отключить{% else %}Активировать{% endif %} пользователя?')">{% csrf_token %}<input type="hidden" name="return_query" value="{{ return_query }}"></form>{% endfor %}
+  {% if page_obj.has_other_pages %}<nav class="adm-pagination" aria-label="Страницы пользователей">{% if page_obj.has_previous %}<a class="ds-btn ds-btn-secondary" href="?{{ filter_query }}&page={{ page_obj.previous_page_number }}">Назад</a>{% endif %}<span>Страница {{ page_obj.number }} из {{ page_obj.paginator.num_pages }}</span>{% if page_obj.has_next %}<a class="ds-btn ds-btn-secondary" href="?{{ filter_query }}&page={{ page_obj.next_page_number }}">Далее</a>{% endif %}</nav>{% endif %}
+</section>
+{% endblock %}

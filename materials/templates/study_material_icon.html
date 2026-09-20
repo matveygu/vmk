@@ -1,0 +1,8 @@
+{% if material_type == 'video' %}<i class="fas fa-video" aria-hidden="true"></i>
+{% elif material_type == 'audio' %}<i class="fas fa-music" aria-hidden="true"></i>
+{% elif material_type == 'image' %}<i class="fas fa-image" aria-hidden="true"></i>
+{% elif material_type == 'document' %}<i class="fas fa-file-pdf" aria-hidden="true"></i>
+{% elif material_type == 'text' %}<i class="fas fa-file-lines" aria-hidden="true"></i>
+{% elif material_type == 'presentation' %}<i class="fas fa-chalkboard" aria-hidden="true"></i>
+{% elif material_type == 'code' %}<i class="fas fa-code" aria-hidden="true"></i>
+{% else %}<i class="fas fa-file" aria-hidden="true"></i>{% endif %}

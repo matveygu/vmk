@@ -1,0 +1,209 @@
+{% extends 'ds_base.html' %}
+{% load static %}
+
+{% block title %}Загрузка материала — Учебный портал МГУ{% endblock %}
+
+{% block content %}
+<div class="ds-page-header">
+  <div>
+    <span class="ds-eyebrow">Материалы</span>
+    <h1>Новый материал</h1>
+    <p>Добавьте файл в учебную библиотеку.</p>
+  </div>
+</div>
+
+<div class="study-editor-layout">
+<div class="ds-card study-editor">
+  <div class="study-editor-heading"><h2>Загрузка файла</h2><p>Название материала будет взято из имени файла.</p></div>
+
+  {% if form.errors %}
+  <div class="ds-alert ds-alert-error">
+    <i class="fas fa-circle-exclamation"></i>
+    <div>
+      {% for field in form %}{% for err in field.errors %}
+      <div>{% if field.label %}{{ field.label }}: {% endif %}{{ err }}</div>
+      {% endfor %}{% endfor %}
+      {% for err in form.non_field_errors %}<div>{{ err }}</div>{% endfor %}
+    </div>
+  </div>
+  {% endif %}
+
+  <form method="post" enctype="multipart/form-data" id="dsUploadForm" class="study-form-stack study-upload-form" novalidate>
+    {% csrf_token %}
+
+    <div class="ds-field">
+      <label for="dsFolderPath">Папка назначения</label>
+      <div class="study-field-row">
+        <input type="text" id="dsFolderPath" class="ds-input" readonly
+               value="{% if selected_folder %}{{ selected_folder }}{% else %}Мой диск (корень){% endif %}">
+        <button type="button" class="ds-btn ds-btn-secondary" onclick="dsOpenModal('dsPickFolderModal')">Выбрать…</button>
+      </div>
+      <input type="hidden" name="folder" id="dsFolderId" value="{% if selected_folder %}{{ selected_folder.id }}{% endif %}">
+    </div>
+
+    <div class="ds-field">
+      <label for="{{ form.new_folder.id_for_label }}">Новая вложенная папка <span class="study-form-help">· необязательно</span></label>
+      <input type="text" name="new_folder" id="{{ form.new_folder.id_for_label }}" class="ds-input" value="{{ form.new_folder.value|default:'' }}" placeholder="Например, лекции за сентябрь">
+      <span class="study-form-help">Будет создана внутри выбранной папки.</span>
+    </div>
+
+    <div class="ds-field">
+      <label for="id_file">Файл</label>
+      <div class="ds-dropzone" id="dsDropzone">
+        <div id="dsDropzoneInner">
+          <div class="ds-dropzone-icon"><i class="fas fa-file-upload"></i></div>
+          <div class="ds-dropzone-text">Перетащите файл сюда или <strong>нажмите для выбора</strong></div>
+          <div class="ds-dropzone-hint">Максимальный размер — 1 ГБ</div>
+        </div>
+        <input type="file" name="file" id="id_file" aria-describedby="dsFileError" required>
+      </div>
+      <div id="dsFileError" class="study-form-error" role="alert" hidden></div>
+      <div class="ds-file-preview" id="dsFilePreview">
+        <div class="ds-file-preview-icon" id="dsPreviewIcon"><i class="fas fa-file"></i></div>
+        <div>
+          <div class="ds-file-preview-name" id="dsPreviewName"></div>
+          <div class="ds-file-preview-size" id="dsPreviewSize"></div>
+        </div>
+        <button type="button" class="ds-icon-btn danger ds-file-preview-remove" id="dsRemoveFile" aria-label="Убрать выбранный файл"><i class="fas fa-times" aria-hidden="true"></i></button>
+      </div>
+    </div>
+
+    <details class="study-formats">
+      <summary>Поддерживаемые форматы файлов</summary>
+      <div class="ds-fmt-grid">
+        <div class="ds-fmt-item"><div class="ds-fmt-label"><i class="fas fa-video ds-file-video"></i> Видео</div><div class="ds-fmt-exts">mp4 · webm · mov · avi · mkv · flv</div></div>
+        <div class="ds-fmt-item"><div class="ds-fmt-label"><i class="fas fa-music ds-file-audio"></i> Аудио</div><div class="ds-fmt-exts">mp3 · wav · aac · flac</div></div>
+        <div class="ds-fmt-item"><div class="ds-fmt-label"><i class="fas fa-image ds-file-image"></i> Изображения</div><div class="ds-fmt-exts">png · jpg · jpeg · webp · gif</div></div>
+        <div class="ds-fmt-item"><div class="ds-fmt-label"><i class="fas fa-file-pdf ds-file-document"></i> Документы</div><div class="ds-fmt-exts">pdf · djvu</div></div>
+        <div class="ds-fmt-item"><div class="ds-fmt-label"><i class="fas fa-file-word ds-file-code"></i> Офис</div><div class="ds-fmt-exts">doc · docx · ppt · pptx · xls · xlsx · txt</div></div>
+        <div class="ds-fmt-item"><div class="ds-fmt-label"><i class="fas fa-file-zipper ds-file-other"></i> Архивы</div><div class="ds-fmt-exts">zip · rar · 7z</div></div>
+        <div class="ds-fmt-item"><div class="ds-fmt-label"><i class="fas fa-code ds-file-code"></i> Код и скрипты</div><div class="ds-fmt-exts">asm · s · c · h · cpp · cc · cxx · hpp · py · pyw · java · kt · js · ts · cs · go · rs · rb · php · pl · sql · sh · bat · ps1 · html · css · json · xml · yaml · yml · m · r · hs · lisp · scm</div></div>
+      </div>
+    </details>
+
+    <div class="study-form-actions">
+      <button type="submit" class="ds-btn ds-btn-primary" id="dsSubmitBtn"><i class="fas fa-cloud-arrow-up"></i> Загрузить</button>
+      <a href="{% url 'materials_drive_root' %}" class="ds-btn ds-btn-secondary">Отмена</a>
+    </div>
+  </form>
+</div>
+<aside class="study-editor-aside"><i class="fas fa-cloud-arrow-up" aria-hidden="true"></i><h3>Всё для занятий в одном месте</h3><p>Документы, записи лекций, изображения и архивы размером до 1 ГБ.</p><p>Понятные названия файлов и папок помогут студентам быстрее найти нужную тему.</p></aside>
+</div>
+
+<div class="ds-modal-scrim" id="dsPickFolderModal">
+  <div class="ds-modal study-folder-picker" role="dialog" aria-modal="true" aria-labelledby="dsPickFolderTitle">
+    <div class="ds-modal-head"><h3 id="dsPickFolderTitle"><i class="fas fa-folder-open" aria-hidden="true"></i> Выбор папки</h3></div>
+    <div class="ds-modal-body study-folder-picker-list">
+      <button type="button" class="ds-pill dsPickFolderBtn" data-id="" data-path="Мой диск (корень)">
+        <i class="fas fa-hard-drive" aria-hidden="true"></i> Мой диск (корень)
+      </button>
+      {% for f in folders %}
+      <button type="button" class="ds-pill dsPickFolderBtn" data-id="{{ f.id }}" data-path="{{ f }}">
+        <i class="fas fa-folder ds-file-folder" aria-hidden="true"></i> {{ f }}
+      </button>
+      {% empty %}
+      <div class="study-folder-picker-empty">Нет доступных папок</div>
+      {% endfor %}
+    </div>
+    <div class="ds-modal-foot">
+      <button type="button" class="ds-btn ds-btn-secondary" onclick="dsCloseModal('dsPickFolderModal')">Закрыть</button>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+(function () {
+  const ALLOWED = new Set(['.mp4','.webm','.ogg','.mov','.avi','.mkv','.flv','.m3u8','.mp3','.wav','.aac','.flac',
+    '.png','.jpg','.jpeg','.webp','.gif','.pdf','.djvu','.doc','.docx','.ppt','.pptx','.xls','.xlsx','.txt','.zip','.rar','.7z',
+    '.asm','.s','.c','.h','.cpp','.cc','.cxx','.hpp','.py','.pyw','.java','.kt','.js','.ts','.cs','.go','.rs',
+    '.rb','.php','.pl','.sql','.sh','.bat','.ps1','.html','.css','.json','.xml','.yaml','.yml','.m','.r','.hs','.lisp','.scm']);
+  const MAX_BYTES = 1024 * 1024 * 1024;
+  const TYPE_ICONS = {
+    video: '<i class="fas fa-video ds-file-video"></i>', audio: '<i class="fas fa-music ds-file-audio"></i>',
+    image: '<i class="fas fa-image ds-file-image"></i>', document: '<i class="fas fa-file-pdf ds-file-document"></i>',
+    presentation: '<i class="fas fa-chalkboard ds-file-presentation"></i>', code: '<i class="fas fa-code ds-file-code"></i>',
+    other: '<i class="fas fa-file ds-file-other"></i>',
+  };
+  const EXT_TYPE = {
+    '.mp4':'video','.webm':'video','.mov':'video','.avi':'video','.mkv':'video','.flv':'video','.ogg':'video',
+    '.mp3':'audio','.wav':'audio','.aac':'audio','.flac':'audio',
+    '.png':'image','.jpg':'image','.jpeg':'image','.webp':'image','.gif':'image',
+    '.pdf':'document','.djvu':'document','.ppt':'presentation','.pptx':'presentation',
+    '.zip':'other','.rar':'other','.7z':'other',
+    '.asm':'code','.s':'code','.c':'code','.h':'code','.cpp':'code','.cc':'code','.cxx':'code','.hpp':'code',
+    '.py':'code','.pyw':'code','.java':'code','.kt':'code','.js':'code','.ts':'code','.cs':'code','.go':'code','.rs':'code',
+    '.rb':'code','.php':'code','.pl':'code','.sql':'code','.sh':'code','.bat':'code','.ps1':'code',
+    '.html':'code','.css':'code','.json':'code','.xml':'code','.yaml':'code','.yml':'code',
+    '.m':'code','.r':'code','.hs':'code','.lisp':'code','.scm':'code',
+  };
+
+  const fileInput = document.getElementById('id_file');
+  const dropzone = document.getElementById('dsDropzone');
+  const errEl = document.getElementById('dsFileError');
+  const preview = document.getElementById('dsFilePreview');
+  const previewIcon = document.getElementById('dsPreviewIcon');
+  const previewName = document.getElementById('dsPreviewName');
+  const previewSize = document.getElementById('dsPreviewSize');
+  const removeBtn = document.getElementById('dsRemoveFile');
+
+  function fmtSize(bytes) {
+    if (bytes < 1024) return bytes + ' Б';
+    if (bytes < 1024*1024) return (bytes/1024).toFixed(1) + ' КБ';
+    if (bytes < 1024*1024*1024) return (bytes/1024/1024).toFixed(1) + ' МБ';
+    return (bytes/1024/1024/1024).toFixed(2) + ' ГБ';
+  }
+  function clearError() { errEl.hidden = true; errEl.textContent = ''; dropzone.classList.remove('has-error'); fileInput.removeAttribute('aria-invalid'); }
+  function showError(msg) { errEl.textContent = msg; errEl.hidden = false; dropzone.classList.add('has-error'); preview.classList.remove('show'); fileInput.setAttribute('aria-invalid', 'true'); }
+  function showPreview(file) {
+    const ext = '.' + file.name.split('.').pop().toLowerCase();
+    previewIcon.innerHTML = TYPE_ICONS[EXT_TYPE[ext] || 'other'];
+    previewName.textContent = file.name;
+    previewSize.textContent = fmtSize(file.size);
+    preview.classList.add('show');
+  }
+  function validateAndPreview(file) {
+    clearError();
+    if (!file) { preview.classList.remove('show'); return true; }
+    const ext = '.' + file.name.split('.').pop().toLowerCase();
+    if (!ALLOWED.has(ext)) { showError('Недопустимый формат файла «' + ext + '».'); return false; }
+    if (file.size > MAX_BYTES) { showError('Файл слишком большой (' + fmtSize(file.size) + '). Максимум — 1 ГБ.'); return false; }
+    showPreview(file);
+    return true;
+  }
+
+  if (fileInput) fileInput.addEventListener('change', function () { validateAndPreview(this.files[0] || null); });
+  if (removeBtn) removeBtn.addEventListener('click', function (e) {
+    e.stopPropagation();
+    if (fileInput) { fileInput.value = ''; try { fileInput.files = new DataTransfer().files; } catch (_) {} }
+    preview.classList.remove('show'); clearError();
+  });
+  if (dropzone) {
+    dropzone.addEventListener('dragover', function (e) { e.preventDefault(); dropzone.classList.add('drag-over'); });
+    dropzone.addEventListener('dragleave', function () { dropzone.classList.remove('drag-over'); });
+    dropzone.addEventListener('drop', function (e) {
+      e.preventDefault(); dropzone.classList.remove('drag-over');
+      const file = e.dataTransfer.files[0];
+      if (file && fileInput) {
+        try { const dt = new DataTransfer(); dt.items.add(file); fileInput.files = dt.files; validateAndPreview(fileInput.files[0]); }
+        catch (_) { showError('Не удалось прикрепить файл перетаскиванием. Нажмите на область загрузки и выберите файл.'); }
+      }
+    });
+  }
+  document.getElementById('dsUploadForm').addEventListener('submit', function (e) {
+    const file = fileInput && fileInput.files[0];
+    if (!file) { showError('Выберите файл для загрузки.'); e.preventDefault(); return; }
+    if (!validateAndPreview(file)) e.preventDefault();
+  });
+
+  document.querySelectorAll('.dsPickFolderBtn').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      document.getElementById('dsFolderId').value = this.getAttribute('data-id');
+      document.getElementById('dsFolderPath').value = this.getAttribute('data-path');
+      dsCloseModal('dsPickFolderModal');
+    });
+  });
+})();
+</script>
+{% endblock %}

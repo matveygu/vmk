@@ -1,0 +1,31 @@
+{% extends 'ds_base.html' %}
+{% load static %}
+
+{% block title %}Удалить папку — {{ folder.name }}{% endblock %}
+
+{% block content %}
+<div class="ds-page-header">
+  <div>
+    <span class="ds-eyebrow">Материалы</span>
+    <h1>Удалить папку</h1>
+  </div>
+</div>
+
+<div class="ds-card study-editor study-editor-sm study-danger-card">
+  <div class="ds-alert ds-alert-error">
+    <i class="fas fa-triangle-exclamation"></i>
+    Вы уверены, что хотите удалить папку «{{ folder.name }}»? Все материалы внутри будут также удалены.
+  </div>
+  <form method="post">
+    {% csrf_token %}
+    <div class="study-form-actions">
+      <button type="submit" class="ds-btn ds-btn-danger"><i class="fas fa-trash"></i> Удалить</button>
+      {% if parent_id %}
+      <a href="{% url 'materials_drive_folder' parent_id %}" class="ds-btn ds-btn-secondary">Отмена</a>
+      {% else %}
+      <a href="{% url 'materials_drive_root' %}" class="ds-btn ds-btn-secondary">Отмена</a>
+      {% endif %}
+    </div>
+  </form>
+</div>
+{% endblock %}

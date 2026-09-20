@@ -1,0 +1,29 @@
+{% extends 'ds_base.html' %}
+{% load static role_tags %}
+
+{% block title %}Домашние задания — Портал ВМК МГУ{% endblock %}
+
+{% block content %}
+<div class="ds-page-header ws-page-header">
+  <div><span class="ds-eyebrow">Учебный процесс</span><h1>Домашние задания</h1><p>{% if user.role == 'teacher' %}Задания к вашим занятиям и сроки сдачи.{% elif user.group %}Группа {{ user.group.number }} · задания, сроки и файлы.{% else %}Задания появятся здесь после привязки к учебной группе.{% endif %}</p></div>
+  <div class="ds-actions">{% if user|has_role:"headman,teacher,admin" %}<a href="{% url 'schedule' %}" class="ds-btn ds-btn-primary"><i class="fas fa-plus" aria-hidden="true"></i> Задать ДЗ</a>{% else %}<a href="{% url 'schedule' %}" class="ds-btn ds-btn-secondary"><i class="far fa-calendar" aria-hidden="true"></i> Расписание</a>{% endif %}</div>
+</div>
+
+<div class="ws-feed-toolbar"><span class="ws-count-label"><span class="ws-count">{{ active_count }}</span> с текущим или будущим сроком</span><span class="ws-muted">По сроку сдачи</span></div>
+
+<div class="ws-assignment-list">
+  {% for hw in items %}
+  <article class="ds-card ws-assignment">
+    <div class="ws-assignment-icon" aria-hidden="true"><i class="fas fa-list-check"></i></div>
+    <div class="ws-assignment-main">
+      <div class="ws-assignment-head"><div><span class="ws-section-kicker">{{ hw.schedule.get_day_display }} · {{ hw.schedule.time }}</span><h2>{{ hw.subject.name|default:hw.schedule.subject.name }}</h2></div><span class="ws-due-date"><i class="far fa-clock" aria-hidden="true"></i> {% if hw.due_date %}До {{ hw.due_date|date:"j E Y" }}{% else %}Без срока{% endif %}</span></div>
+      <div class="ws-homework-content">{{ hw.content|linebreaksbr }}</div>
+      <div class="ws-assignment-footer"><div class="ws-meta-row">{% if hw.file %}<a class="ds-news-file-chip" href="{{ hw.file.url }}" target="_blank" rel="noopener"><i class="fas fa-paperclip" aria-hidden="true"></i> Файл задания</a>{% endif %}<span>Выдано {{ hw.assigned_date|date:"j E" }}</span></div>
+      {% if user|has_role:"headman,teacher,admin" %}<div class="ws-inline-actions"><a href="{% url 'add_homework' hw.schedule_id %}" class="ws-text-link"><i class="fas fa-plus" aria-hidden="true"></i> Добавить задание</a><form method="post" action="{% url 'delete_homework' hw.id %}" onsubmit="return confirm('Удалить домашнее задание?')">{% csrf_token %}<button type="submit" class="ws-text-button ws-text-danger"><i class="far fa-trash-can" aria-hidden="true"></i> Удалить</button></form></div>{% endif %}</div>
+    </div>
+  </article>
+  {% empty %}
+  <div class="ds-card"><div class="ds-empty ws-empty"><span class="ws-empty-icon"><i class="fas fa-list-check" aria-hidden="true"></i></span><span class="ds-empty-title">Домашних заданий пока нет</span><span class="ds-empty-desc">Когда появятся задания к занятиям, они будут собраны здесь вместе со сроками и файлами.</span><a href="{% url 'schedule' %}" class="ds-btn ds-btn-secondary ds-btn-sm">Перейти к расписанию</a></div></div>
+  {% endfor %}
+</div>
+{% endblock %}

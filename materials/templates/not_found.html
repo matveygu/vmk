@@ -1,0 +1,15 @@
+{% extends 'ds_base.html' %}
+{% load static %}
+
+{% block title %}Материалы не найдены — Учебный портал МГУ{% endblock %}
+
+{% block content %}
+<div class="ds-card">
+  <div class="ds-empty">
+    <i class="fas fa-triangle-exclamation"></i>
+    <span class="ds-empty-title">Материалы не найдены</span>
+    <span class="ds-empty-desc">Файл мог быть удалён или перемещён.</span>
+    <a href="{% url 'materials_drive_root' %}" class="ds-btn ds-btn-primary"><i class="fas fa-arrow-left"></i> К списку материалов</a>
+  </div>
+</div>
+{% endblock %}

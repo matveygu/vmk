@@ -1,0 +1,66 @@
+{% extends 'ds_base.html' %}
+{% load static schedule_filters %}
+
+{% block title %}Задать домашнее задание — Учебный портал МГУ{% endblock %}
+
+{% block content %}
+<div class="ds-page-header">
+  <div>
+    <span class="ds-eyebrow">Расписание</span>
+    <h1>Новое задание</h1>
+    <p>{{ schedule.subject }} · {{ schedule.group }}</p>
+  </div>
+  <div class="ds-actions">
+    <a href="{% url 'schedule' %}?date={{ current_date_str }}" class="ds-btn ds-btn-secondary"><i class="fas fa-arrow-left"></i> Назад к расписанию</a>
+  </div>
+</div>
+
+<div class="study-editor-layout">
+<div class="ds-card study-editor">
+  <div class="study-editor-heading"><h2>Что подготовить к занятию</h2><p>Задание и вложение будут доступны студентам в расписании.</p></div>
+  {% if form.errors %}<div class="ds-alert ds-alert-error" role="alert">{% for field in form %}{% for err in field.errors %}<div>{{ field.label }}: {{ err }}</div>{% endfor %}{% endfor %}{{ form.non_field_errors }}</div>{% endif %}
+  <form method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+    <div class="study-form-stack">
+
+      <div class="ds-field">
+        <label for="id_content">Текст задания</label>
+        <textarea name="content" id="id_content" class="ds-textarea" rows="6" placeholder="Укажите задачи, темы или главы для подготовки" required>{{ form.content.value|default:"" }}</textarea>
+      </div>
+
+      <div class="ds-field">
+        <label for="id_due_date">Срок сдачи</label>
+        <div class="ds-input-wrap">
+          <i class="fas fa-calendar-days leading"></i>
+          <input type="date" name="due_date" id="id_due_date" class="ds-input with-icon"
+                 value="{% if form.is_bound %}{{ form.due_date.value|default:'' }}{% else %}{{ form.due_date.value|default:current_date|date:'Y-m-d' }}{% endif %}" required>
+        </div>
+        <div class="study-date-options">
+          {% for week_date in week_dates %}
+          <button type="button" class="ds-pill" onclick="document.getElementById('id_due_date').value='{{ week_date|date:'Y-m-d' }}'">
+            {{ week_date|ru_day_short }} {{ week_date|date:"d.m" }}{% if week_date == current_date %} · сегодня{% endif %}
+          </button>
+          {% endfor %}
+        </div>
+      </div>
+
+      <div class="ds-field">
+        <label for="id_file">Вложение (необязательно)</label>
+        <input type="file" name="file" id="id_file" class="ds-input study-file-input">
+        {% if form.instance.file %}
+        <span class="study-form-help">
+          <i class="fas fa-paperclip"></i> Текущий файл: <a href="{{ form.instance.file.url }}" target="_blank">{{ form.instance.file.name }}</a>
+        </span>
+        {% endif %}
+      </div>
+
+      <div class="study-form-actions">
+        <button type="submit" class="ds-btn ds-btn-primary"><i class="fas fa-check"></i> Сохранить задание</button>
+        <a href="{% url 'schedule' %}?date={{ current_date_str }}" class="ds-btn ds-btn-secondary">Отмена</a>
+      </div>
+    </div>
+  </form>
+</div>
+<aside class="study-editor-aside"><i class="fas fa-book-open" aria-hidden="true"></i><h3>{{ schedule.subject }}</h3><p>{{ schedule.group }}{% if schedule.classroom %}<br>Аудитория {{ schedule.classroom }}{% endif %}</p><p>Укажите срок сдачи, чтобы студенты увидели задание у нужного занятия. Файл можно приложить при необходимости.</p></aside>
+</div>
+{% endblock %}

@@ -1,0 +1,32 @@
+{% extends 'ds_base.html' %}
+{% load static %}
+
+{% block title %}Редактировать папку — {{ folder.name }}{% endblock %}
+
+{% block content %}
+<div class="ds-page-header">
+  <div>
+    <span class="ds-eyebrow">Материалы</span>
+    <h1>Редактирование папки</h1>
+  </div>
+</div>
+
+<div class="ds-card study-editor study-editor-sm">
+  <div class="study-editor-heading"><h2>Переименовать папку</h2><p>Файлы внутри папки сохранятся на своих местах.</p></div>
+  <form method="post" class="study-form-stack">
+    {% csrf_token %}
+    <div class="ds-field">
+      <label for="dsFolderNameInput">Название папки</label>
+      <input type="text" id="dsFolderNameInput" class="ds-input" name="name" value="{{ folder.name }}" required>
+    </div>
+    <div class="study-form-actions">
+      <button type="submit" class="ds-btn ds-btn-primary"><i class="fas fa-check"></i> Сохранить</button>
+      {% if folder.parent_folder_id %}
+      <a href="{% url 'materials_drive_folder' folder.parent_folder_id %}" class="ds-btn ds-btn-secondary">Отмена</a>
+      {% else %}
+      <a href="{% url 'materials_drive_root' %}" class="ds-btn ds-btn-secondary">Отмена</a>
+      {% endif %}
+    </div>
+  </form>
+</div>
+{% endblock %}

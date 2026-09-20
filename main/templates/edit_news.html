@@ -1,0 +1,45 @@
+{% extends 'ds_base.html' %}
+{% load static %}
+
+{% block title %}Редактировать новость — Учебный портал МГУ{% endblock %}
+
+{% block extra_css %}<link rel="stylesheet" href="{% static 'css/ds/editor.css' %}">{% endblock %}
+
+{% block content %}
+<div class="ds-page-header ws-page-header">
+  <div>
+    <span class="ds-eyebrow">Новости факультета</span>
+    <h1>Редактировать новость</h1>
+    <p>Автор: {{ news.author.name }} · создана {{ news.created_at|date:"d.m.Y H:i" }}</p>
+  </div>
+  <div class="ds-actions"><a href="{{ next_url }}" class="ds-btn ds-btn-secondary"><i class="fas fa-arrow-left" aria-hidden="true"></i> К новостям</a></div>
+</div>
+
+<div class="news-editor-layout">
+  {% include 'partials/news_editor_form.html' with submit_label='Сохранить изменения' editing=True %}
+  <aside class="news-editor-aside" aria-labelledby="newsEditorHelp">
+    <span class="ws-panel-icon"><i class="far fa-pen-to-square" aria-hidden="true"></i></span>
+    <h2 id="newsEditorHelp">Уточните важные детали</h2>
+    <p>Обновите текст, категорию или вложение. Проверьте даты и место события перед сохранением.</p>
+    <div class="news-editor-note"><h3>Прикреплённый файл</h3><p>Вы можете заменить вложение или отметить его удаление в форме.</p></div>
+    <p class="news-editor-save-note"><i class="fas fa-circle-info" aria-hidden="true"></i> Правки вступят в силу после нажатия «Сохранить изменения».</p>
+  </aside>
+</div>
+
+<div class="ds-modal-scrim" id="dsDeleteNewsModal">
+  <div class="ds-modal news-editor-delete-modal" role="dialog" aria-modal="true" aria-labelledby="newsDeleteTitle" aria-describedby="newsDeleteDescription">
+    <div class="ds-modal-head"><h3 id="newsDeleteTitle">Удалить новость?</h3><button type="button" class="ds-icon-btn" aria-label="Закрыть окно удаления" onclick="dsCloseModal('dsDeleteNewsModal')"><i class="fas fa-xmark" aria-hidden="true"></i></button></div>
+    <div class="ds-modal-body" id="newsDeleteDescription">
+      <p>Новость «{{ news.title }}» будет удалена из ленты. Это действие нельзя отменить.</p>
+    </div>
+    <div class="ds-modal-foot">
+      <button type="button" class="ds-btn ds-btn-secondary" onclick="dsCloseModal('dsDeleteNewsModal')">Отмена</button>
+      <form method="post" action="{% url 'delete_news' news.id %}">
+        {% csrf_token %}
+        <input type="hidden" name="next" value="{{ next_url }}">
+        <button type="submit" class="ds-btn ds-btn-danger"><i class="fas fa-trash" aria-hidden="true"></i> Удалить новость</button>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

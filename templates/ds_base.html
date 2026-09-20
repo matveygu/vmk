@@ -1,0 +1,53 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="ru" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#173c70">
+    <title>{% block title %}Учебный портал ВМК МГУ{% endblock %}</title>
+    <link rel="icon" type="image/png" href="{% static 'images/favicon.png' %}">
+    {% include 'partials/ds_theme_init.html' %}
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+    <link href="{% static 'css/ds/tokens.css' %}?v=20260912-3" rel="stylesheet">
+    <link href="{% static 'css/ds/chrome.css' %}?v=20260912-3" rel="stylesheet">
+    <link href="{% static 'css/ds/departments.css' %}?v=20260912-3" rel="stylesheet">
+    <link href="{% static 'css/ds/components.css' %}?v=20260912-3" rel="stylesheet">
+    <link href="{% static 'css/ds/refinement.css' %}?v=20260912-3" rel="stylesheet">
+    <link href="{% static 'css/ds/shell.css' %}?v=20260912-3" rel="stylesheet">
+    <link href="{% static 'css/ds/public.css' %}?v=20260912-3" rel="stylesheet">
+    <link href="{% static 'css/ds/workspace.css' %}?v=20260912-3" rel="stylesheet">
+    <link href="{% static 'css/ds/study.css' %}?v=20260912-3" rel="stylesheet">
+    {% block extra_css %}{% endblock %}
+</head>
+<body class="ds-scope {% if user.is_authenticated %}ds-private{% else %}ds-public{% endif %}" id="dsBody">
+    <a href="#main-content" class="ds-skip-link">Перейти к содержимому</a>
+    {% include 'partials/ds_topnav.html' %}
+    {% include 'partials/ds_sidenav.html' %}
+    <main class="ds-container" id="main-content" tabindex="-1">
+        {% if messages %}
+        <div id="dsFlashMessages" class="ds-flash-messages" aria-live="polite">
+            {% for message in messages %}
+            <div class="ds-alert ds-alert-{% if message.tags == 'error' or message.tags == 'danger' %}error{% elif message.tags == 'success' %}success{% elif message.tags == 'warning' %}warning{% else %}info{% endif %}">
+                <i class="fas fa-circle-info" aria-hidden="true"></i>
+                <span>{{ message }}</span>
+                <button type="button" class="ds-alert-close" aria-label="Закрыть уведомление" onclick="this.closest('.ds-alert').remove()"><i class="fas fa-xmark" aria-hidden="true"></i></button>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+        {% block content %}{% endblock %}
+    </main>
+    <footer class="ds-footer">
+      <span>Учебный портал · ВМК МГУ</span>
+      <div class="ds-footer-links">
+        <span>Студенческий проект</span>
+        <a href="https://cs.msu.ru/" target="_blank" rel="noopener">Сайт факультета <i class="fas fa-arrow-up-right-from-square" aria-hidden="true"></i></a>
+      </div>
+    </footer>
+    <script src="{% static 'js/portal.js' %}?v=20260912-3"></script>
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

@@ -1,0 +1,46 @@
+{% extends 'ds_base.html' %}
+{% load static %}
+
+{% block title %}Профиль — Портал ВМК МГУ{% endblock %}
+
+{% block content %}
+<div class="ds-page-header ws-page-header">
+  <div><span class="ds-eyebrow">Личный кабинет</span><h1>Мой профиль</h1><p>Учебная информация и контактные данные.</p></div>
+  <div class="ds-actions"><a href="{% url 'edit_profile' %}" class="ds-btn ds-btn-primary"><i class="fas fa-pen" aria-hidden="true"></i> Редактировать профиль</a></div>
+</div>
+
+<div class="ws-profile-layout">
+  <aside class="ds-card ws-profile-card">
+    <div class="ws-profile-cover" aria-hidden="true"><span>ВМК / МГУ</span></div>
+    <div class="ws-profile-identity">
+      {% if user.photo %}<img src="{{ user.photo.url }}" class="ds-avatar-lg ws-profile-avatar" alt="Фото {{ user.name }}">{% else %}<span class="ds-avatar-lg ws-profile-avatar" aria-hidden="true">{{ user.name|default:user.student_id|slice:":1"|upper }}</span>{% endif %}
+      <h2>{{ user.name|default:user.student_id }}</h2>
+      <span class="ws-profile-id">{{ user.student_id }}</span>
+      <div class="ws-profile-badges"><span class="ds-role-badge ds-role-{{ user.role }}">{{ user.get_role_display }}</span>{% if user.is_active %}<span class="ds-badge ws-badge-success">Активный</span>{% endif %}</div>
+      {% if user.group %}<p>{{ user.course }} курс · группа {{ user.group.number }}</p>{% endif %}
+    </div>
+    <div class="ws-profile-signout"><form method="post" action="{% url 'logout' %}">{% csrf_token %}<button type="submit" class="ds-btn ds-btn-secondary ds-btn-full"><i class="fas fa-right-from-bracket" aria-hidden="true"></i> Выйти из аккаунта</button></form></div>
+  </aside>
+
+  <div class="ws-stack">
+    <section class="ds-card" aria-labelledby="wsStudyInfo">
+      <div class="ws-panel-title"><span class="ws-panel-icon"><i class="fas fa-graduation-cap" aria-hidden="true"></i></span><div><h2 id="wsStudyInfo">Учебная информация</h2><p>Ваше место в университете</p></div></div>
+      <dl class="ws-info-grid">
+        <div><dt>Номер студенческого</dt><dd class="ws-mono">{{ user.student_id }}</dd></div>
+        <div><dt>Факультет</dt><dd>{{ user.faculty|default:"Не указан" }}</dd></div>
+        <div><dt>Курс</dt><dd>{% if user.course %}{{ user.course }} курс{% else %}Не указан{% endif %}</dd></div>
+        <div><dt>Группа</dt><dd>{{ user.group.number|default:"Не указана" }}</dd></div>
+      </dl>
+    </section>
+    <section class="ds-card" aria-labelledby="wsContacts">
+      <div class="ws-panel-title"><span class="ws-panel-icon"><i class="far fa-address-card" aria-hidden="true"></i></span><div><h2 id="wsContacts">Контактные данные</h2><p>Можно обновить в настройках профиля</p></div></div>
+      <dl class="ws-info-grid"><div><dt>Электронная почта</dt><dd>{{ user.email|default:"Не указана" }}</dd></div><div><dt>Телефон</dt><dd>{{ user.phone|default:"Не указан" }}</dd></div></dl>
+    </section>
+    <section class="ds-card" aria-labelledby="wsAccount">
+      <div class="ws-panel-title"><span class="ws-panel-icon"><i class="fas fa-shield-halved" aria-hidden="true"></i></span><div><h2 id="wsAccount">Аккаунт и безопасность</h2><p>История входа и управление паролем</p></div></div>
+      <dl class="ws-info-grid"><div><dt>Дата регистрации</dt><dd>{{ user.date_joined|date:"j E Y" }}</dd></div><div><dt>Последний вход</dt><dd>{{ user.last_login|date:"j E Y, H:i"|default:"—" }}</dd></div></dl>
+      <a href="{% url 'edit_profile' %}#password" class="ws-text-link ws-panel-link"><i class="fas fa-key" aria-hidden="true"></i> Изменить пароль</a>
+    </section>
+  </div>
+</div>
+{% endblock %}

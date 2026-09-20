@@ -1,0 +1,50 @@
+{% extends 'ds_base.html' %}
+
+{% block title %}{{ department.name }} — ВМК МГУ{% endblock %}
+
+{% block content %}
+<div class="pub-page pub-department-detail">
+  <nav class="ds-breadcrumb" aria-label="Хлебные крошки"><a href="{% url 'department_list' %}">Кафедры</a><span aria-hidden="true">/</span><span class="current">{{ department.abbr }}</span></nav>
+  <header class="pub-dept-hero">
+    <span class="pub-dept-mark">{{ department.abbr }}</span>
+    <div><span class="pub-kicker">{{ department.stream }}</span><h1>{{ department.name }}</h1><p>{{ department.directions|slice:":2"|join:" · " }}</p><a class="pub-text-link" href="{{ department.url }}" target="_blank" rel="noopener">Страница на cs.msu.ru <i class="fas fa-arrow-up-right-from-square" aria-hidden="true"></i></a></div>
+  </header>
+
+  <nav class="pub-dept-switcher" aria-label="Другие кафедры">
+    <span class="pub-kicker">Кафедры</span><div class="ds-pill-row">{% for d in all_departments %}<a class="ds-pill{% if d.id == department.id %} active{% endif %}" href="{% url 'department_detail' d.id %}" title="{{ d.name }}"{% if d.id == department.id %} aria-current="page"{% endif %}>{{ d.abbr }}</a>{% endfor %}</div>
+  </nav>
+
+  <div class="pub-detail-layout">
+    <div class="pub-detail-main">
+      <section class="pub-content-card">
+        <div class="pub-card-heading"><h2>О кафедре</h2>{% if department.founded and department.founded != '—' %}<span class="ds-badge">С {{ department.founded }} года</span>{% endif %}</div>
+        <p class="pub-about-text">{{ department.about }}</p>
+        <div class="pub-directions"><h3>Научные направления</h3><ul>{% for direction in department.directions %}<li><i class="fas fa-arrow-right" aria-hidden="true"></i>{{ direction }}</li>{% endfor %}</ul></div>
+      </section>
+
+      <details class="pub-disclosure">
+        <summary><span><i class="fas fa-signs-post" aria-hidden="true"></i> Как попасть на кафедру</span><i class="fas fa-chevron-down pub-disclosure-chevron" aria-hidden="true"></i></summary>
+        <div class="pub-disclosure-body">
+          {% if department.apply_note %}<div class="pub-source-note"><i class="fas fa-circle-info" aria-hidden="true"></i><p>{{ department.apply_note }}</p></div>{% endif %}
+          <div class="pub-distribution-list">{% for step in distribution_steps %}<div class="pub-distribution-step"><span class="pub-row-index">0{{ forloop.counter }}</span><div><h3>{{ step.title }}</h3><p>{{ step.note }}</p></div></div>{% endfor %}</div>
+          {% if department.apply_url %}<a class="pub-text-link" href="{{ department.apply_url }}" target="_blank" rel="noopener">Материалы кафедры <i class="fas fa-arrow-up-right-from-square" aria-hidden="true"></i></a>{% endif %}
+        </div>
+      </details>
+
+      {% if department.extra_items %}
+      <section class="pub-content-card"><div class="pub-card-heading"><h2>{{ department.extra_title }}</h2></div><ul class="pub-detail-items">{% for item in department.extra_items %}<li>{{ item }}</li>{% endfor %}</ul></section>
+      {% endif %}
+    </div>
+    <aside class="pub-detail-aside">
+      <section class="pub-content-card"><span class="pub-kicker">Руководство</span><h2 class="pub-person-name">{{ department.head }}</h2><p class="pub-muted">{{ department.head_note }}</p></section>
+      {% if department.people %}<section class="pub-content-card"><div class="pub-card-heading"><h2>Преподаватели</h2></div><ul class="pub-people">{% for person in department.people %}<li>{{ person }}</li>{% endfor %}</ul></section>{% endif %}
+      <section class="pub-content-card"><div class="pub-card-heading"><h2>Контакты</h2></div><div class="pub-contact-list">
+        {% if department.room %}<span><i class="fas fa-location-dot" aria-hidden="true"></i>{{ department.room }}</span>{% endif %}
+        {% if department.email %}<a href="mailto:{{ department.email }}"><i class="fas fa-envelope" aria-hidden="true"></i>{{ department.email }}</a>{% endif %}
+        {% if department.phone %}<span><i class="fas fa-phone" aria-hidden="true"></i>{{ department.phone }}</span>{% endif %}
+        {% if department.site %}<a href="{{ department.site_url }}" target="_blank" rel="noopener"><i class="fas fa-arrow-up-right-from-square" aria-hidden="true"></i>{{ department.site }}</a>{% endif %}
+      </div></section>
+    </aside>
+  </div>
+</div>
+{% endblock %}
