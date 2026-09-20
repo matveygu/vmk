@@ -32,8 +32,8 @@ class DownloadMaterialTests(TestCase):
     def test_download_uses_display_name(self):
         url = reverse('download_material', args=[self.material.id])
         response = self.client.get(url)
-        self.addCleanup(response.file_to_stream.close)
         self.assertEqual(response.status_code, 200)
+        self.assertEqual(b''.join(response.streaming_content), self.file_content)
         self.assertIn('Content-Disposition', response)
         disp = response['Content-Disposition']
         # RFC 5987 encoding: spaces become %20
@@ -45,8 +45,8 @@ class DownloadMaterialTests(TestCase):
         self.material.save()
         url = reverse('download_material', args=[self.material.id])
         response = self.client.get(url)
-        self.addCleanup(response.file_to_stream.close)
         self.assertEqual(response.status_code, 200)
+        self.assertEqual(b''.join(response.streaming_content), self.file_content)
         self.assertIn('Content-Disposition', response)
         # RFC 5987 encoded filename
         self.assertIn('AnotherName.pdf', response['Content-Disposition'])
@@ -71,7 +71,6 @@ class DownloadMaterialTests(TestCase):
         self.assertContains(response, 'скачайте его')
         self.assertTrue(response.context['material'].file.closed)
         download = self.client.get(reverse('download_material', args=[material.pk]))
-        self.addCleanup(download.file_to_stream.close)
         self.assertEqual(b''.join(download.streaming_content), content)
 
     def test_view_has_no_inline_styles(self):

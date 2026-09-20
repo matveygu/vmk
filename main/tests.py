@@ -26,8 +26,8 @@ class DownloadNewsTests(TestCase):
     def test_download_uses_title(self):
         url = reverse('download_news', args=[self.news.id])
         resp = self.client.get(url)
-        self.addCleanup(resp.file_to_stream.close)
         self.assertEqual(resp.status_code, 200)
+        self.assertEqual(b''.join(resp.streaming_content), b'data')
         # RFC 5987 encoding: spaces become %20
         self.assertIn('My%20Title.txt', resp['Content-Disposition'])
 

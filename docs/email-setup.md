@@ -20,7 +20,7 @@
 
 ## Локальная проверка
 
-В `.env`:
+В `.env` для локального Python или в `.env.docker` для Docker:
 
 ```dotenv
 DJANGO_DEBUG=True
@@ -29,6 +29,10 @@ PORTAL_PUBLIC_URL=http://127.0.0.1:8000
 ```
 
 Примените миграцию и запустите сервер:
+
+Ниже команды для локального Python/SQLite. Если вы уже используете PostgreSQL,
+запускайте сайт и миграции через Docker по [инструкции](docker-postgres.md),
+не переключайтесь на старую SQLite. Настройки описаны в [справочнике окружения](environment.md).
 
 ```shell
 python manage.py migrate

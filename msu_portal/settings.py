@@ -13,12 +13,13 @@ import os
 from pathlib import Path
 from dotenv import load_dotenv
 from datetime import date
-
-# Load environment variables
-load_dotenv()
+from django.core.exceptions import ImproperlyConfigured
+from .env import env_bool, env_csv, env_int
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
+# Only this checkout's local profile; process/Docker environment takes precedence.
+load_dotenv(BASE_DIR / '.env', override=False)
 
 # Everything that must survive a redeploy/restart (database, uploaded files, logs)
 # lives under one directory so a single persistent disk/volume can be mounted here.
@@ -29,66 +30,27 @@ DATA_DIR.mkdir(parents=True, exist_ok=True)
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
-# SECURITY WARNING: keep the secret key used in production secret!
-# Pull from environment with a safe development fallback
-SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY', 'django-insecure-f2=h)p!v&mel!s-yibwuw#ggbieht4k0tin#eg*a90s_b+g&z%')
+DEBUG = env_bool('DJANGO_DEBUG', True)
+SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY', '')
+if not SECRET_KEY or SECRET_KEY in ('GENERATE_ME', 'your-secret-key-here-change-in-production'):
+    if not DEBUG:
+        raise ImproperlyConfigured('Set a private DJANGO_SECRET_KEY before production startup.')
+    SECRET_KEY = 'django-insecure-local-development-only'
 
-# SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = os.environ.get('DJANGO_DEBUG', 'True').lower() in ('1', 'true', 'yes')
-
-# Hosts and CSRF origins
-ALLOWED_HOSTS = []
-
-# Get allowed hosts from environment
-allowed_hosts_env = os.environ.get('DJANGO_ALLOWED_HOSTS', '')
-if allowed_hosts_env:
-    ALLOWED_HOSTS.extend([h.strip() for h in allowed_hosts_env.split(',') if h.strip()])
-
-# Add Render.com hostname
-RENDER_EXTERNAL_HOSTNAME = os.environ.get('RENDER_EXTERNAL_HOSTNAME')
-if RENDER_EXTERNAL_HOSTNAME:
-    ALLOWED_HOSTS.append(RENDER_EXTERNAL_HOSTNAME)
-
-# Fallback for development
-if DEBUG and not ALLOWED_HOSTS:
-    ALLOWED_HOSTS.extend(['localhost', '127.0.0.1'])
-
-# If no hosts configured, allow Render subdomains as a sensible production fallback
-# This permits example.onrender.com and its subdomains. You can still set
-# DJANGO_ALLOWED_HOSTS explicitly in Render environment for stricter control.
-if not ALLOWED_HOSTS:
-    ALLOWED_HOSTS.append('.onrender.com')
-# CSRF trusted origins
-CSRF_TRUSTED_ORIGINS = []
-
-# Get CSRF origins from environment
-csrf_origins_env = os.environ.get('DJANGO_CSRF_TRUSTED_ORIGINS', '')
-if csrf_origins_env:
-    CSRF_TRUSTED_ORIGINS.extend([o.strip() for o in csrf_origins_env.split(',') if o.strip()])
-
-# Automatically add Render.com to CSRF trusted origins
-if RENDER_EXTERNAL_HOSTNAME:
-    CSRF_TRUSTED_ORIGINS.append(f'https://{RENDER_EXTERNAL_HOSTNAME}')
-
-# Add common development origins
-if DEBUG:
-    CSRF_TRUSTED_ORIGINS.extend([
-        'http://localhost:8000',
-        'http://127.0.0.1:8000',
-        'http://localhost:3000',
-        'http://127.0.0.1:3000',
-    ])
-
-# Fallback CSRF origins
-if not CSRF_TRUSTED_ORIGINS:
-    CSRF_TRUSTED_ORIGINS = [
-        'https://msu-study-portal.onrender.com',
-        'http://localhost:8000',
-    ]
+ALLOWED_HOSTS = env_csv('DJANGO_ALLOWED_HOSTS', 'localhost,127.0.0.1' if DEBUG else '')
+if not DEBUG and (not ALLOWED_HOSTS or '*' in ALLOWED_HOSTS):
+    raise ImproperlyConfigured('Set explicit DJANGO_ALLOWED_HOSTS before production startup.')
+CSRF_TRUSTED_ORIGINS = env_csv(
+    'DJANGO_CSRF_TRUSTED_ORIGINS',
+    'http://localhost:8000,http://127.0.0.1:8000' if DEBUG else '',
+)
 
 
 # дата начала семестра для вычисления чётности недели (можно переопределять в env)
-SEMESTER_START_DATE = date(2026, 1, 15)
+try:
+    SEMESTER_START_DATE = date.fromisoformat(os.environ.get('SEMESTER_START_DATE', '2026-01-15'))
+except ValueError:
+    raise ImproperlyConfigured('SEMESTER_START_DATE must use YYYY-MM-DD.') from None
 
 # Application definition
 
@@ -108,7 +70,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
-    'whitenoise.middleware.WhiteNoiseMiddleware',  # Add this for static files on Render
+    'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -148,13 +110,18 @@ DATABASES = {
         'ENGINE': 'django.db.backends.sqlite3',
         'NAME': os.environ.get('SQLITE_PATH', DATA_DIR / 'db.sqlite3'),
         'OPTIONS': {
-            'timeout': int(os.environ.get('DATABASE_TIMEOUT', 20)),
+            'timeout': env_int('DATABASE_TIMEOUT', 20),
         }
     }
 }
 
 # Compose uses separate credentials, avoiding URL-escaping problems in passwords.
+if os.environ.get('DATABASE_ENGINE', '') not in ('', 'sqlite', 'postgresql'):
+    raise ImproperlyConfigured('DATABASE_ENGINE must be sqlite or postgresql.')
 if os.environ.get('DATABASE_ENGINE') == 'postgresql':
+    for variable in ('POSTGRES_DB', 'POSTGRES_USER', 'POSTGRES_PASSWORD'):
+        if not os.environ.get(variable) or os.environ[variable] == 'GENERATE_ME':
+            raise ImproperlyConfigured(f'Set {variable} for PostgreSQL.')
     DATABASES['default'] = {
         'ENGINE': 'django.db.backends.postgresql',
         'NAME': os.environ['POSTGRES_DB'],
@@ -243,11 +210,13 @@ LOGIN_URL = 'login'
 # Set a real SMTP backend and sender in the environment on Yandex Cloud.
 EMAIL_BACKEND = os.environ.get('EMAIL_BACKEND', 'django.core.mail.backends.console.EmailBackend' if DEBUG else 'django.core.mail.backends.smtp.EmailBackend')
 EMAIL_HOST = os.environ.get('EMAIL_HOST', '')
-EMAIL_PORT = int(os.environ.get('EMAIL_PORT', '587'))
+EMAIL_PORT = env_int('EMAIL_PORT', 587, maximum=65535)
 EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER', '')
 EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD', '')
-EMAIL_USE_TLS = os.environ.get('EMAIL_USE_TLS', 'True').lower() in ('1', 'true', 'yes')
-EMAIL_USE_SSL = os.environ.get('EMAIL_USE_SSL', 'False').lower() in ('1', 'true', 'yes')
+EMAIL_USE_TLS = env_bool('EMAIL_USE_TLS', True)
+EMAIL_USE_SSL = env_bool('EMAIL_USE_SSL', False)
+if EMAIL_USE_TLS and EMAIL_USE_SSL:
+    raise ImproperlyConfigured('Enable only one of EMAIL_USE_TLS and EMAIL_USE_SSL.')
 EMAIL_TIMEOUT = 10
 DEFAULT_FROM_EMAIL = os.environ.get('DEFAULT_FROM_EMAIL', 'Учебный портал ВМК МГУ <noreply@localhost>')
 PORTAL_PUBLIC_URL = os.environ.get('PORTAL_PUBLIC_URL', 'http://127.0.0.1:8000' if DEBUG else '')
@@ -258,7 +227,7 @@ SECURE_CONTENT_TYPE_NOSNIFF = True
 SECURE_BROWSER_XSS_FILTER = True
 SESSION_COOKIE_SECURE = not DEBUG
 CSRF_COOKIE_SECURE = not DEBUG
-SECURE_SSL_REDIRECT = (os.environ.get('DJANGO_SECURE_SSL_REDIRECT', 'True').lower() in ('1', 'true', 'yes')) and not DEBUG
+SECURE_SSL_REDIRECT = env_bool('DJANGO_SECURE_SSL_REDIRECT', True) and not DEBUG
 SECURE_HSTS_SECONDS = 31536000 if not DEBUG else 0
 SECURE_HSTS_INCLUDE_SUBDOMAINS = not DEBUG
 SECURE_HSTS_PRELOAD = not DEBUG
@@ -269,12 +238,13 @@ X_FRAME_OPTIONS = 'DENY'
 # Additional security settings
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 # Enable only behind a proxy that overwrites X-Real-IP; Compose binds web to loopback.
-TRUST_PROXY_CLIENT_IP = os.environ.get('DJANGO_TRUST_PROXY_CLIENT_IP', 'False').lower() in ('1', 'true', 'yes')
+TRUST_PROXY_CLIENT_IP = env_bool('DJANGO_TRUST_PROXY_CLIENT_IP', False)
 
-# Create logs directory if it doesn't exist
-LOGS_DIR = DATA_DIR / 'logs'
-LOGS_DIR.mkdir(exist_ok=True)
-
+# One stream for all workers; Docker handles rotation outside the processes.
+# Gunicorn/Nginx access logging stays off; diagnostic logs must also stay private.
+LOG_LEVEL = os.environ.get('LOG_LEVEL', 'INFO').strip().upper()
+if LOG_LEVEL not in ('DEBUG', 'INFO', 'WARNING', 'ERROR', 'CRITICAL'):
+    raise ImproperlyConfigured('LOG_LEVEL must be DEBUG, INFO, WARNING, ERROR or CRITICAL.')
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
@@ -283,44 +253,15 @@ LOGGING = {
             'format': '[%(asctime)s] [%(levelname)s] [%(name)s] %(message)s',
             'datefmt': '%Y-%m-%d %H:%M:%S',
         },
-        'detailed': {
-            'format': '[%(asctime)s] [%(levelname)s] [%(name)s] [%(module)s] [%(lineno)d] %(message)s',
-            'datefmt': '%Y-%m-%d %H:%M:%S',
-        },
     },
     'handlers': {
-        'file_info': {
-            'level': 'INFO',
-            'class': 'logging.handlers.RotatingFileHandler',
-            'filename': LOGS_DIR / 'app-info.log',
-            'formatter': 'standard',
-            'maxBytes': 1024 * 1024 * 5,  # 5 MB
-            'backupCount': 5,
-        },
-        'file_error': {
-            'level': 'ERROR',
-            'class': 'logging.handlers.RotatingFileHandler',
-            'filename': LOGS_DIR / 'app-error.log',
-            'formatter': 'detailed',
-            'maxBytes': 1024 * 1024 * 10,  # 10 MB
-            'backupCount': 3,
-        },
         'console': {
-            'level': 'ERROR',
             'class': 'logging.StreamHandler',
             'formatter': 'standard',
         },
     },
+    'root': {'handlers': ['console'], 'level': LOG_LEVEL},
     'loggers': {
-        'django': {
-            'handlers': ['file_info', 'file_error'],
-            'level': 'INFO',
-            'propagate': True,
-        },
-        'myapp': {  # замените на имя вашего приложения
-            'handlers': ['file_info', 'file_error'],
-            'level': 'INFO',
-            'propagate': False,
-        },
-    }
+        'django': {'handlers': ['console'], 'level': LOG_LEVEL, 'propagate': False},
+    },
 }

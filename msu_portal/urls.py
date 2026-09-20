@@ -19,9 +19,10 @@ from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
 from django.views.generic import TemplateView
-from main.deployment_views import media_access
+from main.deployment_views import health, media_access
 
 urlpatterns = [
+    path('_health/', health, name='health'),
     path('_media_auth/', media_access, name='media_access'),
     path('admin/', admin.site.urls),
     path('robots.txt', TemplateView.as_view(
