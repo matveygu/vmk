@@ -10,6 +10,7 @@ from django.db.models import Q, Exists, OuterRef
 from main.admin_access import role_required
 from .models import Schedule, Subject, Homework, Group
 from .forms import HomeworkForm, GroupSelectForm
+from .timing import annotate_timing, campus_now, date_parity, milliseconds
 
 
 def is_headman_or_above(user):
@@ -31,23 +32,36 @@ WEEK_DAY_SHORT_NAMES = ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб']
 
 @login_required
 def schedule_view(request):
+    now = campus_now()
+    today = now.date()
+    raw_date = request.GET.get('date', '')
+    try:
+        current_date = date.fromisoformat(raw_date)
+        # Keep week navigation within datetime's range.
+        if not 2 <= current_date.year <= 9998:
+            raise ValueError
+    except ValueError:
+        current_date = today
+    if raw_date != current_date.isoformat():
+        params = request.GET.copy()
+        params['date'] = current_date.isoformat()
+        return redirect(f"{reverse('schedule')}?{params.urlencode()}")
+    view_mode = 'week' if request.GET.get('view') == 'week' else 'day'
     user_group = request.user.group
 
     if not user_group and request.user.role != "teacher":
         context = {
             'schedule': [],
             'week_dates': [],
-            'current_date': date.today(),
+            'current_date': current_date,
+            'current_date_str': current_date.isoformat(),
+            'today_str': today.isoformat(),
+            'view_mode': view_mode,
+            'current_parity': date_parity(current_date),
+            'timing_now': milliseconds(now),
             'error': '❌ У вас не назначена группа. Обратитесь к администратору.'
         }
         return render(request, 'schedule.html', context)
-
-    # Получаем дату из параметра или текущую дату
-    current_date_str = request.GET.get('date', date.today().isoformat())
-    try:
-        current_date = datetime.strptime(current_date_str, '%Y-%m-%d').date()
-    except ValueError:
-        current_date = date.today()
 
     # Вычисляем даты недели
     start_of_week = current_date - timedelta(days=current_date.weekday())
@@ -59,9 +73,7 @@ def schedule_view(request):
     next_week = (start_of_week + timedelta(days=7)).isoformat()
 
     # вычисляем номер недели относительно даты начала семестра (по умолчанию january1)
-    semester_start = getattr(settings, 'SEMESTER_START_DATE', date(current_date.year, 1, 1))
-    week_number = ((current_date - semester_start).days // 7) + 1
-    current_parity = 'even' if week_number % 2 == 0 else 'odd'
+    current_parity = date_parity(current_date)
     # ручной оверрайд для отладки/навигации
     parity_override = request.GET.get('parity')
     if parity_override in ['even', 'odd', 'all']:
@@ -94,8 +106,8 @@ def schedule_view(request):
             homework_by_schedule[dz.schedule_id] = dz
     for lesson in schedule:
         lesson.day_homework = homework_by_schedule.get(lesson.id)
+    annotate_timing(schedule, current_date, now)
 
-    view_mode = request.GET.get('view', 'day')
     week_schedule = []
     if view_mode == 'week':
         day_indices = {name: index for index, name in enumerate(WEEK_DAY_NAMES)}
@@ -105,6 +117,8 @@ def schedule_view(request):
         week_schedule.sort(key=lambda lesson: (day_indices[lesson.day], lesson.lesson_number))
         for lesson in week_schedule:
             lesson.row_date = week_dates[day_indices[lesson.day]]
+        for day in week_dates:
+            annotate_timing([row for row in week_schedule if row.row_date == day], day, now)
 
     context = {
         'schedule': schedule,
@@ -113,6 +127,8 @@ def schedule_view(request):
         'week_dates': week_dates,
         'current_date': current_date,
         'current_date_str': current_date.isoformat(),
+        'today_str': today.isoformat(),
+        'timing_now': milliseconds(now),
         'previous_week': previous_week,
         'next_week': next_week,
         'homework': homework,

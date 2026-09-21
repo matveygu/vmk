@@ -1,5 +1,6 @@
 """Regression checks: adding rows must not add one SQL query per row."""
 from datetime import date, datetime
+from zoneinfo import ZoneInfo
 from unittest.mock import patch
 
 from django.db import connection
@@ -82,9 +83,7 @@ class QueryEfficiencyTests(TestCase):
                             for lesson in response.context['week_schedule']))
 
     def test_home_queries_do_not_grow(self):
-        with patch('main.views.date') as day, patch('main.views.datetime') as clock:
-            day.today.return_value = date(2026, 1, 5)
-            clock.now.return_value = datetime(2026, 1, 5, 10)
+        with patch('main.views.campus_now', return_value=datetime(2026, 1, 5, 10, tzinfo=ZoneInfo('Europe/Moscow'))):
             response = self.compare_lessons('home', reverse('home'), {})
         self.assertEqual(len(response.context['today_schedule']), 21)
         self.assertContains(response, 'Первое задание')

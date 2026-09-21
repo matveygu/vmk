@@ -1,0 +1,51 @@
+/* Shared by the private dashboard and timetable; no opacity on readable content. */
+.ds-scope [data-lesson-timing] {
+  transition: background-color .2s ease, box-shadow .2s ease;
+}
+.ds-scope .lesson-is-past {
+  --ds-text-heading: var(--ds-text-muted);
+  --ds-text-body: var(--ds-text-muted);
+  --ds-text-link: var(--ds-text-muted);
+  background-color: var(--ds-surface-sunken);
+  color: var(--ds-text-muted);
+}
+.ds-scope .lesson-is-past .ws-lesson-content { border-left-color: var(--ds-border-subtle); }
+.ds-scope .lesson-is-past .ws-lesson-content::before { background: var(--ds-text-muted); }
+.ds-scope .lesson-is-past .ws-lesson-homework,
+.ds-scope .lesson-is-past .study-homework {
+  background: transparent;
+  border-color: var(--ds-border-subtle);
+}
+.ds-scope .lesson-is-current,
+.ds-scope .lesson-is-next {
+  position: relative;
+  border-radius: 12px;
+  box-shadow: inset 0 0 0 2px var(--ds-success-fg);
+  background-color: var(--ds-success-bg);
+}
+.ds-scope .lesson-is-current .ws-lesson-content,
+.ds-scope .lesson-is-next .ws-lesson-content { border-left-color: var(--ds-success-border); }
+.ds-scope .lesson-is-current .ws-lesson-content::before,
+.ds-scope .lesson-is-next .ws-lesson-content::before { background: var(--ds-success-fg); }
+.ds-scope .lesson-timing-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font: 600 11px/1.5 var(--ds-font-ui);
+  color: var(--ds-text-muted);
+}
+.ds-scope .lesson-timing-label[hidden] { display: none; }
+.ds-scope .ds-lesson-main > .lesson-timing-label { margin-bottom: 4px; }
+.ds-scope .lesson-is-current .lesson-timing-label,
+.ds-scope .lesson-is-next .lesson-timing-label { color: var(--ds-success-fg); }
+.ds-scope .lesson-is-current .lesson-timing-label::before {
+  content: '';
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: currentColor;
+}
+.ds-scope .lesson-timing-hint { font-size: 12px; color: var(--ds-text-muted); margin: 0 0 14px; }
+@media (prefers-reduced-motion: reduce) {
+  .ds-scope [data-lesson-timing] { transition: none; }
+}

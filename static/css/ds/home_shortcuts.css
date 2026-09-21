@@ -1,0 +1,32 @@
+.ds-scope .ws-quick-links {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 22px;
+}
+.ds-scope .ws-quick-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 46px;
+  width: 46px;
+  height: 46px;
+  border: 1px solid var(--ds-border-subtle);
+  border-radius: 13px;
+  background: var(--ds-surface-card);
+  color: var(--ds-brand-primary);
+  font-size: 18px;
+  text-decoration: none;
+  transition: background-color .16s ease, border-color .16s ease;
+}
+.ds-scope .ws-quick-icon:hover {
+  background: var(--ds-brand-primary-soft);
+  border-color: var(--ds-brand-primary-soft-border);
+}
+.ds-scope .ws-quick-icon:focus-visible {
+  outline: 2px solid var(--ds-border-focus);
+  outline-offset: 3px;
+}
+@media (prefers-reduced-motion: reduce) {
+  .ds-scope .ws-quick-icon { transition: none; }
+}

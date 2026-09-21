@@ -1,7 +1,9 @@
 {% extends 'ds_base.html' %}
-{% load static role_tags %}
+{% load static role_tags schedule_links %}
 
 {% block title %}Мой день — Портал ВМК МГУ{% endblock %}
+{% block extra_css %}<link rel="stylesheet" href="{% static 'css/ds/lesson_timing.css' %}?v=20260921-1"><link rel="stylesheet" href="{% static 'css/ds/home_shortcuts.css' %}?v=20260921-1">{% endblock %}
+{% block extra_js %}<script src="{% static 'js/lesson_timing.js' %}?v=20260921-1" defer></script>{% endblock %}
 
 {% block content %}
 <div class="ds-page-header ws-page-header">
@@ -13,26 +15,26 @@
   <time class="ws-date-pill" datetime="{{ today|date:'Y-m-d' }}"><i class="far fa-calendar" aria-hidden="true"></i> {{ today|date:"j E, l" }}</time>
 </div>
 
-<nav class="ws-shortcuts" aria-label="Быстрые переходы">
-  <a class="ws-shortcut" href="{% url 'schedule' %}"><span class="ws-shortcut-icon"><i class="far fa-calendar-days" aria-hidden="true"></i></span><span><strong>Расписание</strong><small>План на день и неделю</small></span><i class="fas fa-arrow-right ws-shortcut-arrow" aria-hidden="true"></i></a>
-  <a class="ws-shortcut" href="{% url 'homework_list' %}"><span class="ws-shortcut-icon"><i class="fas fa-list-check" aria-hidden="true"></i></span><span><strong>Задания</strong><small>Сроки и вложения</small></span><i class="fas fa-arrow-right ws-shortcut-arrow" aria-hidden="true"></i></a>
-  <a class="ws-shortcut" href="{% url 'materials_drive_root' %}"><span class="ws-shortcut-icon"><i class="far fa-folder-open" aria-hidden="true"></i></span><span><strong>Материалы</strong><small>Файлы для занятий</small></span><i class="fas fa-arrow-right ws-shortcut-arrow" aria-hidden="true"></i></a>
+<nav class="ws-quick-links" aria-label="Быстрые переходы">
+  <a class="ws-quick-icon" href="{% today_schedule_url %}" aria-label="Расписание" title="Расписание"><i class="far fa-calendar-days" aria-hidden="true"></i></a>
+  <a class="ws-quick-icon" href="{% url 'homework_list' %}" aria-label="Задания" title="Задания"><i class="fas fa-list-check" aria-hidden="true"></i></a>
+  <a class="ws-quick-icon" href="{% url 'materials_drive_root' %}" aria-label="Материалы" title="Материалы"><i class="far fa-folder-open" aria-hidden="true"></i></a>
 </nav>
 
 <div class="ws-dashboard">
   <div class="ws-stack">
     <section class="ds-card ds-card-flush ws-day-card" aria-labelledby="wsDayTitle">
       <div class="ds-card-head ws-section-head">
-        <div><span class="ws-section-kicker">Учебный день</span><h2 id="wsDayTitle">{% if flag %}Завтра в расписании{% else %}Сегодня в расписании{% endif %}</h2></div>
-        <a href="{% url 'schedule' %}" class="ws-text-link">Вся неделя <i class="fas fa-arrow-right" aria-hidden="true"></i></a>
+        <div><span class="ws-section-kicker">Учебный день</span><h2 id="wsDayTitle">Сегодня в расписании</h2></div>
+        <a href="{% today_schedule_url %}&view=week" class="ws-text-link">Вся неделя <i class="fas fa-arrow-right" aria-hidden="true"></i></a>
       </div>
       {% if today_schedule %}
-      <div class="ws-lessons">
+      <div class="ws-lessons" data-timetable data-server-now="{{ timing_now }}">
         {% for lesson in today_schedule %}
-        <article class="ws-lesson">
+        <article class="ws-lesson{% if lesson.timing_state %} lesson-is-{{ lesson.timing_state }}{% endif %}" {% include 'partials/lesson_timing_attrs.html' %}>
           <div class="ws-lesson-clock"><strong>{{ lesson.time }}</strong>{% if lesson.time_end %}<span>{{ lesson.time_end }}</span>{% endif %}</div>
           <div class="ws-lesson-content">
-            <div class="ws-lesson-topline"><span>{{ lesson.lesson_number }} пара</span>{% if lesson.week_parity != "all" %}<span>{{ lesson.get_week_parity_display }}</span>{% endif %}</div>
+            <div class="ws-lesson-topline"><span>{{ lesson.lesson_number }} пара</span>{% if lesson.week_parity != "all" %}<span>{{ lesson.get_week_parity_display }}</span>{% endif %}{% include 'partials/lesson_timing_label.html' %}</div>
             <h3>{{ lesson.subject.name }}</h3>
             <div class="ws-lesson-details"><span>{{ lesson.first_teacher_name|default:"Преподаватель не указан" }}</span>{% if lesson.classroom %}<span><i class="fas fa-location-dot" aria-hidden="true"></i> {{ lesson.classroom }}{% if lesson.another_classroom %} / {{ lesson.another_classroom }}{% endif %}</span>{% endif %}</div>
             {% if lesson.today_homework %}
@@ -51,10 +53,10 @@
         <span class="ws-empty-icon"><i class="far fa-calendar-check" aria-hidden="true"></i></span>
         <span class="ds-empty-title">{% if not user.group and user.role != 'teacher' %}Группа пока не указана{% else %}Свободный день{% endif %}</span>
         <span class="ds-empty-desc">{% if not user.group and user.role != 'teacher' %}Данные вашей группы можно посмотреть в профиле.{% else %}На этот день занятий в расписании нет. Можно заглянуть в планы на неделю.{% endif %}</span>
-        <a href="{% url 'schedule' %}" class="ds-btn ds-btn-secondary ds-btn-sm">Открыть расписание</a>
+        <a href="{% today_schedule_url %}" class="ds-btn ds-btn-secondary ds-btn-sm">Открыть расписание</a>
       </div>
       {% endif %}
-      <div class="ws-card-foot"><i class="fas fa-circle-info" aria-hidden="true"></i><span>{% if user.role == 'teacher' %}Ваши занятия{% elif user.group %}Группа {{ user.group.number }}{% else %}Личное расписание{% endif %} · {% if flag %}после 18:00 показываем следующий день{% else %}полное расписание доступно в разделе «Расписание»{% endif %}</span></div>
+      <div class="ws-card-foot"><i class="fas fa-circle-info" aria-hidden="true"></i><span>{% if user.role == 'teacher' %}Ваши занятия{% elif user.group %}Группа {{ user.group.number }}{% else %}Личное расписание{% endif %} · Время московское · Зелёная рамка — текущая или ближайшая пара</span></div>
     </section>
 
     <section class="ds-card ds-card-flush" aria-labelledby="wsNewsTitle">

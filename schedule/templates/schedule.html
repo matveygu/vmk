@@ -2,6 +2,8 @@
 {% load static role_tags schedule_filters %}
 
 {% block title %}Расписание — Учебный портал МГУ{% endblock %}
+{% block extra_css %}<link rel="stylesheet" href="{% static 'css/ds/lesson_timing.css' %}?v=20260921-1">{% endblock %}
+{% block extra_js %}<script src="{% static 'js/lesson_timing.js' %}?v=20260921-1" defer></script>{% endblock %}
 
 {% block content %}
 <div class="ds-page-header">
@@ -11,7 +13,7 @@
     <p>{% if user.role == 'teacher' %}Ваши занятия и домашние задания{% elif user.group %}Группа {{ user.group.number }}{% if user.course %} · {{ user.course }} курс{% endif %}{% else %}Занятия и домашние задания{% endif %}</p>
   </div>
   <div class="ds-actions">
-    <a class="ds-btn ds-btn-secondary" href="{% url 'schedule' %}?view={{ view_mode|default:'day' }}"><i class="fas fa-calendar-day" aria-hidden="true"></i> Сегодня</a>
+    <a class="ds-btn ds-btn-secondary" href="{% url 'schedule' %}?date={{ today_str }}&view={{ view_mode|default:'day' }}"><i class="fas fa-calendar-day" aria-hidden="true"></i> Сегодня</a>
     <div class="ds-segmented" aria-label="Вид расписания">
       <a class="{% if view_mode != 'week' %}active{% endif %}" {% if view_mode != 'week' %}aria-current="page"{% endif %} href="?date={{ current_date_str }}&parity={{ current_parity }}&view=day">День</a>
       <a class="{% if view_mode == 'week' %}active{% endif %}" {% if view_mode == 'week' %}aria-current="page"{% endif %} href="?date={{ current_date_str }}&parity={{ current_parity }}&view=week">Неделя</a>
@@ -49,16 +51,17 @@
 </section>
 {% endif %}
 
+<p class="lesson-timing-hint">Время московское. Зелёная рамка — текущая или ближайшая пара сегодня.</p>
 {% if view_mode == 'week' %}
-<div class="study-week">
+<div class="study-week" data-timetable data-server-now="{{ timing_now }}">
   {% regroup week_schedule by row_date as days %}
   {% for day in days %}
   <section class="ds-card ds-card-flush study-week-day">
     <div class="study-section-heading"><h2>{{ day.grouper|ru_day_short }} <span>{{ day.grouper|date:"j E" }}</span></h2><a href="?date={{ day.grouper|date:'Y-m-d' }}&parity={{ current_parity }}&view=day" class="study-text-link">Открыть день <i class="fas fa-arrow-right" aria-hidden="true"></i></a></div>
     {% for lesson in day.list %}
-    <div class="ds-lesson-row study-lesson study-week-lesson">
+    <div class="ds-lesson-row study-lesson study-week-lesson{% if lesson.timing_state %} lesson-is-{{ lesson.timing_state }}{% endif %}" {% include 'partials/lesson_timing_attrs.html' %}>
       <div class="study-lesson-slot"><span class="ds-lesson-num">{{ lesson.lesson_number }}</span><span class="ds-lesson-time">{{ lesson.time }}{% if lesson.time_end %}<span>{{ lesson.time_end }}</span>{% endif %}</span></div>
-      <div class="ds-lesson-main"><div class="ds-lesson-subject">{{ lesson.subject.name }}</div><div class="ds-lesson-meta">{% if user|has_role:"teacher" %}Группа {{ lesson.group.number }}{% else %}{{ lesson.first_teacher_name|default:"Преподаватель не указан" }}{% endif %}{% if lesson.week_parity != 'all' %}<span class="study-parity">{{ lesson.get_week_parity_display }}</span>{% endif %}</div></div>
+      <div class="ds-lesson-main">{% include 'partials/lesson_timing_label.html' %}<div class="ds-lesson-subject">{{ lesson.subject.name }}</div><div class="ds-lesson-meta">{% if user|has_role:"teacher" %}Группа {{ lesson.group.number }}{% else %}{{ lesson.first_teacher_name|default:"Преподаватель не указан" }}{% endif %}{% if lesson.week_parity != 'all' %}<span class="study-parity">{{ lesson.get_week_parity_display }}</span>{% endif %}</div></div>
       <span class="ds-lesson-room"><i class="fas fa-location-dot" aria-hidden="true"></i> {{ lesson.classroom|default:"—" }}{% if lesson.another_classroom %} / {{ lesson.another_classroom }}{% endif %}</span>
       {% if lesson.has_homework %}<a class="ds-icon-btn" href="{% url 'schedule_detail' lesson.id %}" aria-label="Домашние задания: {{ lesson.subject.name }}"><i class="fas fa-paperclip" aria-hidden="true"></i></a>{% endif %}
     </div>
@@ -69,13 +72,14 @@
   {% endfor %}
 </div>
 {% else %}
-<section class="ds-card ds-card-flush study-day-schedule">
+<section class="ds-card ds-card-flush study-day-schedule" data-timetable data-server-now="{{ timing_now }}">
   <div class="study-section-heading"><h2>{{ current_date|date:"j E" }} <span>{{ current_date|ru_day_short }}</span></h2>{% if schedule %}<span class="study-caption">Занятий: {{ schedule|length }}</span>{% endif %}</div>
   {% for lesson in schedule %}
-  <article class="study-lesson-entry">
+  <article class="study-lesson-entry{% if lesson.timing_state %} lesson-is-{{ lesson.timing_state }}{% endif %}" {% include 'partials/lesson_timing_attrs.html' %}>
     <div class="ds-lesson-row study-lesson">
       <div class="study-lesson-slot"><span class="ds-lesson-num">{{ lesson.lesson_number }}</span><span class="ds-lesson-time">{{ lesson.time }}{% if lesson.time_end %}<span>{{ lesson.time_end }}</span>{% endif %}</span></div>
       <div class="ds-lesson-main">
+        {% include 'partials/lesson_timing_label.html' %}
         <div class="ds-lesson-subject">{{ lesson.subject.name }}</div>
         <div class="ds-lesson-meta">{% if user|has_role:"teacher" %}<i class="fas fa-users" aria-hidden="true"></i> Группа {{ lesson.group.number }}{% else %}{{ lesson.first_teacher_name|default:"Преподаватель не указан" }}{% if lesson.second_teacher_id %} / {{ lesson.second_teacher_name }}{% endif %}{% endif %}{% if lesson.week_parity != 'all' %}<span class="study-parity">{{ lesson.get_week_parity_display }}</span>{% endif %}</div>
       </div>

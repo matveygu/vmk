@@ -1,6 +1,11 @@
 {% extends 'ds_base.html' %}
+{% load static %}
 
 {% block title %}ВМК МГУ — Учебный портал{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/ds/faculty_landing.css' %}?v=20260921-1">
+{% endblock %}
 
 {% block content %}
 <div class="pub-page pub-landing">
@@ -40,12 +45,45 @@
     </a>
   </nav>
 
+  <section class="faculty-section" aria-labelledby="faculty-about-title">
+    <div class="faculty-section-head">
+      <div class="pub-section-heading">
+        <span class="pub-kicker">Знакомство с факультетом</span>
+        <h2 id="faculty-about-title">Математика в основе.<br>Технологии в действии.</h2>
+      </div>
+      <p class="faculty-intro">ВМК объединяет прикладную математику, информатику и вычислительные технологии. Здесь учатся не только писать код, но и понимать задачу, строить модель и находить способ её решения.</p>
+    </div>
+    <div class="faculty-foundation">
+      <div class="faculty-year"><strong>1970</strong><span>год основания<br>факультета</span></div>
+      <p>ВМК создан по инициативе академика Андрея Николаевича Тихонова. Связь фундаментальной науки с прикладными задачами остаётся частью факультетской традиции.</p>
+      <a class="pub-text-link" href="https://cs.msu.ru/faculty" target="_blank" rel="noopener noreferrer">О факультете <i class="fas fa-arrow-up-right-from-square" aria-hidden="true"></i></a>
+    </div>
+    <div class="faculty-grid">
+      <article class="faculty-topic">
+        <span class="faculty-icon"><i class="fas fa-square-root-variable" aria-hidden="true"></i></span>
+        <h3>Математический фундамент</h3>
+        <p>Вычислительные методы, теория вероятностей, математическая логика и оптимизация — инструменты для работы со сложными задачами.</p>
+      </article>
+      <article class="faculty-topic">
+        <span class="faculty-icon"><i class="fas fa-code" aria-hidden="true"></i></span>
+        <h3>Информатика и программирование</h3>
+        <p>От понимания алгоритмов до разработки программ. Важен не только результат, но и то, почему решение работает и насколько оно эффективно.</p>
+      </article>
+      <article class="faculty-topic">
+        <span class="faculty-icon"><i class="fas fa-flask" aria-hidden="true"></i></span>
+        <h3>Исследования и модели</h3>
+        <p>Математическая физика, системный анализ, теория управления и другие направления на стыке науки и вычислений.</p>
+      </article>
+    </div>
+    <p class="faculty-source">По материалам <a href="https://cs.msu.ru/faculty" target="_blank" rel="noopener noreferrer">факультета ВМК</a> и <a href="https://pk.cs.msu.ru/faculty" target="_blank" rel="noopener noreferrer">приёмной комиссии</a>.</p>
+  </section>
+
   <section class="pub-education" aria-labelledby="education-title">
     <div class="pub-section-heading">
       <span class="pub-kicker">Образование</span>
       <h2 id="education-title">Выберите свой путь</h2>
       <p>От знакомства с факультетом до выбора научного направления.</p>
-      <a class="pub-text-link" href="https://cs.msu.ru/" target="_blank" rel="noopener">Официальный сайт ВМК <i class="fas fa-arrow-up-right-from-square" aria-hidden="true"></i></a>
+      <a class="pub-text-link" href="https://pk.cs.msu.ru/" target="_blank" rel="noopener noreferrer">Условия поступления <i class="fas fa-arrow-up-right-from-square" aria-hidden="true"></i></a>
     </div>
     <div class="pub-education-list">
       {% for title, desc in programs %}
@@ -54,6 +92,95 @@
         <div><h3>{{ title }}</h3><p>{{ desc }}</p></div>
       </div>
       {% endfor %}
+    </div>
+  </section>
+
+  <section class="faculty-life faculty-section" aria-labelledby="faculty-life-title">
+    <div class="faculty-section-head">
+      <div class="pub-section-heading">
+        <span class="pub-kicker">Не только пары</span>
+        <h2 id="faculty-life-title">Найти своих.<br>Попробовать новое.</h2>
+        <p>Университетская жизнь продолжается и за пределами аудитории.</p>
+      </div>
+      <a class="pub-text-link" href="https://cs.msu.ru/students" target="_blank" rel="noopener noreferrer">Студенческая жизнь ВМК <i class="fas fa-arrow-up-right-from-square" aria-hidden="true"></i></a>
+    </div>
+    <div class="faculty-grid">
+      <article class="faculty-life-item">
+        <i class="fas fa-masks-theater" aria-hidden="true"></i>
+        <div><h3>Творчество и традиции</h3><p>«Театр ++», факультетская газета, День первокурсника и День ВМК — поводы познакомиться и сделать что-то вместе.</p></div>
+      </article>
+      <article class="faculty-life-item">
+        <i class="fas fa-person-running" aria-hidden="true"></i>
+        <div><h3>Спорт и команды</h3><p>Университетские соревнования и факультетский футбол помогают переключиться после занятий и найти команду.</p></div>
+      </article>
+      <article class="faculty-life-item">
+        <i class="fas fa-lightbulb" aria-hidden="true"></i>
+        <div><h3>Делиться знаниями</h3><p>Научные конференции и Вечерняя математическая школа: возможность представить исследование или попробовать себя в преподавании.</p></div>
+      </article>
+    </div>
+  </section>
+
+  <section class="faculty-section" aria-labelledby="faculty-stories-title">
+    <div class="faculty-section-head">
+      <div class="pub-section-heading">
+        <span class="pub-kicker">Личный опыт</span>
+        <h2 id="faculty-stories-title">Учёба глазами выпускников</h2>
+        <p>Разные интересы, разные траектории — и общая отправная точка.</p>
+      </div>
+      <a class="pub-text-link" href="https://sa.cs.msu.ru/alumni_stories" target="_blank" rel="noopener noreferrer">Все истории на сайте кафедры <i class="fas fa-arrow-up-right-from-square" aria-hidden="true"></i></a>
+    </div>
+    <div class="faculty-grid faculty-stories">
+      <article class="faculty-story">
+        <span class="faculty-story-tag">Аналитика и разработка</span>
+        <h3>От математических интересов к большим данным</h3>
+        <p>Андрей рассказывает о выборе непростой кафедры, интересе к вероятностным моделям и оптимизации, а затем — о работе над рекламными платформами и системами аналитики.</p>
+        <div class="faculty-story-author"><span class="faculty-initials" aria-hidden="true">АШ</span><div><strong>Андрей Шохин</strong><span>Выпуск 2013 · системный анализ</span></div></div>
+        <a class="pub-text-link" href="https://sa.cs.msu.ru/alumni_stories" target="_blank" rel="noopener noreferrer" aria-label="Читать историю Андрея Шохина на сайте кафедры">Читать историю <i class="fas fa-arrow-up-right-from-square" aria-hidden="true"></i></a>
+        <small>Публикация от 15.04.2020</small>
+      </article>
+      <article class="faculty-story">
+        <span class="faculty-story-tag">Широкий кругозор</span>
+        <h3>Теория управления и задачи бизнеса</h3>
+        <p>Валентин отмечает широту подготовки: от параллельных вычислений до моделирования и машинного обучения. В своей истории он описывает переход от исследований к работе с банковскими рисками.</p>
+        <div class="faculty-story-author"><span class="faculty-initials" aria-hidden="true">ВС</span><div><strong>Валентин Степанович</strong><span>Выпуск 2012 · системный анализ</span></div></div>
+        <a class="pub-text-link" href="https://sa.cs.msu.ru/alumni_stories" target="_blank" rel="noopener noreferrer" aria-label="Читать историю Валентина Степановича на сайте кафедры">Читать историю <i class="fas fa-arrow-up-right-from-square" aria-hidden="true"></i></a>
+        <small>Публикация от 19.02.2020</small>
+      </article>
+      <article class="faculty-story">
+        <span class="faculty-story-tag">На стыке наук</span>
+        <h3>Математика, которая помогает биологии</h3>
+        <p>Влада познакомилась с биоматематикой через научного руководителя. Дипломная работа о взаимодействии опухоли и иммунной системы стала началом её пути к исследованиям и машинному обучению в медицине.</p>
+        <div class="faculty-story-author"><span class="faculty-initials" aria-hidden="true">ВР</span><div><strong>Влада Розова</strong><span>Выпуск 2015 · системный анализ</span></div></div>
+        <a class="pub-text-link" href="https://sa.cs.msu.ru/alumni_stories" target="_blank" rel="noopener noreferrer" aria-label="Читать историю Влады Розовой на сайте кафедры">Читать историю <i class="fas fa-arrow-up-right-from-square" aria-hidden="true"></i></a>
+        <small>Публикация от 26.03.2019</small>
+      </article>
+    </div>
+    <p class="faculty-source">Краткие пересказы опубликованных историй выпускников кафедры системного анализа, не дословные цитаты и не отзывы о портале. Это личный опыт отдельных людей, а не оценка всех кафедр или гарантия карьерного результата.</p>
+  </section>
+
+  <section class="faculty-faq faculty-section" aria-labelledby="faculty-faq-title">
+    <div class="pub-section-heading">
+      <span class="pub-kicker">Перед знакомством с ВМК</span>
+      <h2 id="faculty-faq-title">О чём часто спрашивают</h2>
+      <p>Коротко об учёбе и о том, где искать подробности.</p>
+    </div>
+    <div class="faculty-faq-list">
+      <details class="pub-disclosure">
+        <summary>Здесь больше математики или программирования? <i class="fas fa-chevron-down pub-disclosure-chevron" aria-hidden="true"></i></summary>
+        <div class="pub-disclosure-body"><p>Они связаны: математика помогает описать задачу и построить алгоритм, а программирование — реализовать решение. ВМК стоит рассматривать как фундаментальное образование, а не только обучение конкретным языкам.</p><a class="pub-text-link" href="https://pk.cs.msu.ru/faculty" target="_blank" rel="noopener noreferrer">Объяснение приёмной комиссии <i class="fas fa-arrow-up-right-from-square" aria-hidden="true"></i></a></div>
+      </details>
+      <details class="pub-disclosure">
+        <summary>Когда выбирают кафедру и научное направление? <i class="fas fa-chevron-down pub-disclosure-chevron" aria-hidden="true"></i></summary>
+        <div class="pub-disclosure-body"><p>По информации приёмной комиссии, первые два курса проходят по общей программе, а в конце второго курса выбирают кафедру и научного руководителя. С направлениями можно познакомиться заранее.</p><a class="pub-text-link" href="{% url 'department_list' %}">Посмотреть кафедры <i class="fas fa-arrow-right" aria-hidden="true"></i></a><p class="faculty-source">Источник: <a href="https://pk.cs.msu.ru/faculty" target="_blank" rel="noopener noreferrer">приёмная комиссия ВМК</a>.</p></div>
+      </details>
+      <details class="pub-disclosure">
+        <summary>Где узнать об общежитии и студенческой поддержке? <i class="fas fa-chevron-down pub-disclosure-chevron" aria-hidden="true"></i></summary>
+        <div class="pub-disclosure-body"><p>На сайте факультета есть разделы об общежитиях, стипендиях, медицинской помощи и студенческом совете. Условия заселения и получения поддержки нужно уточнять там: они зависят от конкретной ситуации.</p><a class="pub-text-link" href="https://cs.msu.ru/students" target="_blank" rel="noopener noreferrer">Информация для студентов <i class="fas fa-arrow-up-right-from-square" aria-hidden="true"></i></a></div>
+      </details>
+      <details class="pub-disclosure">
+        <summary>Где смотреть актуальные правила поступления? <i class="fas fa-chevron-down pub-disclosure-chevron" aria-hidden="true"></i></summary>
+        <div class="pub-disclosure-body"><p>Сроки, вступительные испытания, документы и количество мест проверяйте на сайте приёмной комиссии на нужный год. Этот студенческий портал не заменяет официальные объявления.</p><a class="pub-text-link" href="https://pk.cs.msu.ru/" target="_blank" rel="noopener noreferrer">Сайт приёмной комиссии <i class="fas fa-arrow-up-right-from-square" aria-hidden="true"></i></a></div>
+      </details>
     </div>
   </section>
 

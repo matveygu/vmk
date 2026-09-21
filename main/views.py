@@ -11,12 +11,13 @@ from django.conf import settings
 from urllib.parse import quote
 from .forms import CustomAuthForm, CustomUserCreationForm, EditProfileForm
 from django.core.paginator import Paginator
-from datetime import datetime, timedelta, date, time
+from datetime import date
 from .models import News, CustomUser, Group
 from django.db.models import Q, Prefetch
 from django.contrib import messages
 from .forms import NewsForm
 from schedule.models import Schedule, Homework
+from schedule.timing import annotate_timing, campus_now, date_parity, milliseconds
 
 
 def is_teacher_or_above(user):
@@ -103,17 +104,11 @@ def home(request):
     if request.user.is_authenticated:
         # Получаем расписание на сегодня для текущего пользователя
         today_schedule = []
-        now = datetime.now().time()
-        my_time = time(18, 00)
-        schedule_date = date.today()
+        now = campus_now()
+        schedule_date = now.date()
         if hasattr(request.user, 'group') and request.user.group or request.user.role == 'teacher':
             # Получаем расписание на сегодня
-            today = date.today()
-            if now >= my_time:
-                schedule_date = today + timedelta(days=1)
-                today_day = get_day_name_from_weekday(today.weekday() + 1)
-            else:
-                today_day = get_day_name_from_weekday(today.weekday())
+            today_day = get_day_name_from_weekday(schedule_date.weekday())
 
             if request.user.role != 'teacher':
                 today_schedule = Schedule.objects.filter(
@@ -126,13 +121,16 @@ def home(request):
                     day=today_day
                 ).order_by('lesson_number')
 
-            today_schedule = list(today_schedule.select_related('subject').prefetch_related(
+            today_schedule = list(today_schedule.filter(
+                Q(week_parity='all') | Q(week_parity=date_parity(schedule_date)),
+            ).select_related('subject').prefetch_related(
                 Prefetch('homework_assignments',
                          queryset=Homework.objects.filter(assigned_date=schedule_date),
                          to_attr='date_homework'),
             ))
             for lesson in today_schedule:
                 lesson.today_homework = lesson.date_homework[0] if lesson.date_homework else None
+            annotate_timing(today_schedule, schedule_date, now)
 
         published_news = News.objects.filter(is_published=True).select_related('author').order_by('-created_at')
 
@@ -140,18 +138,17 @@ def home(request):
             'today_schedule': today_schedule,
             'latest_news': published_news[:3],
             'news_total_count': published_news.count(),
-            'today': date.today(),
-            'flag': 1 if now >= my_time else 0,
+            'today': schedule_date,
+            'timing_now': milliseconds(now),
         }
         return render(request, 'home.html', context)
     else:
         from departments.models import Department
         programs = [
-            ('Бакалавриат', '«Фундаментальная информатика и информационные технологии», 4 года, очно'),
-            ('Специалитет', '«Прикладная математика и информатика», 6 лет'),
-            ('Магистратура', 'Программы кафедр, 2 года'),
+            ('Бакалавриат', '«Прикладная математика и информатика» и «Фундаментальные информатика и информационные технологии», 4 года'),
+            ('Магистратура', 'Углублённая подготовка по направлениям факультета, 2 года'),
             ('Аспирантура', 'Подготовка научно-педагогических кадров'),
-            ('Второе высшее', 'Вечерняя форма, 3 года'),
+            ('Второе высшее', 'Отдельное отделение; условия обучения уточняйте на сайте факультета'),
         ]
         context = {
             'department_count': Department.objects.count(),
