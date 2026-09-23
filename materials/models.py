@@ -40,11 +40,17 @@ class Material(models.Model):
     folder = models.ForeignKey(MaterialFolder, on_delete=models.SET_NULL, null=True, blank=True, verbose_name='Папка')
     uploaded_by = models.ForeignKey(CustomUser, on_delete=models.CASCADE, verbose_name='Загрузил')
     upload_date = models.DateTimeField(auto_now_add=True, verbose_name='Дата загрузки')
+    subject = models.ForeignKey('schedule.Subject', on_delete=models.SET_NULL,
+                                null=True, blank=True, verbose_name='Предмет')
+    semester = models.PositiveSmallIntegerField('Семестр', null=True, blank=True,
+        choices=[(number, str(number)) for number in range(1, 13)])
 
     class Meta:
         verbose_name = 'Материал'
         verbose_name_plural = 'Материалы'
         ordering = ['-upload_date']
+        constraints = [models.CheckConstraint(condition=models.Q(semester__isnull=True) |
+            models.Q(semester__gte=1, semester__lte=12), name='material_semester_range')]
 
     def __str__(self):
         return self.name
@@ -83,3 +89,12 @@ class Material(models.Model):
         if self.file:
             self.type = self.guess_type(self.file.name)
         super().save(*args, **kwargs)
+
+
+class MaterialFavorite(models.Model):
+    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
+    material = models.ForeignKey(Material, on_delete=models.CASCADE, related_name='favorites')
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        constraints = [models.UniqueConstraint(fields=['user', 'material'], name='unique_material_favorite')]

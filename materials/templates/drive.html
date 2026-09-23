@@ -12,6 +12,10 @@
 
 <div class="ds-card study-drive-toolbar">
   <form method="get" class="study-drive-search" role="search">
+    {% if filter_form.subject.value %}<input type="hidden" name="subject" value="{{ filter_form.subject.value }}">{% endif %}
+    {% if filter_form.semester.value %}<input type="hidden" name="semester" value="{{ filter_form.semester.value }}">{% endif %}
+    {% if filter_form.material_type.value %}<input type="hidden" name="material_type" value="{{ filter_form.material_type.value }}">{% endif %}
+    {% if filter_form.favorites.value %}<input type="hidden" name="favorites" value="1">{% endif %}
     <div class="ds-input-wrap"><i class="fas fa-search leading" aria-hidden="true"></i><input type="search" name="q" value="{{ query }}" class="ds-input with-icon" placeholder="Поиск по названию" aria-label="Поиск материалов"></div>
     <button type="submit" class="ds-icon-btn" aria-label="Найти материалы" title="Найти"><i class="fas fa-arrow-right" aria-hidden="true"></i></button>
   </form>
@@ -22,6 +26,18 @@
     </div>
   </div>
 </div>
+
+<form method="get" class="ds-card material-filters" aria-label="Фильтры материалов">
+  <input type="hidden" name="q" value="{{ query }}">
+  <div class="ds-field"><label for="{{ filter_form.subject.id_for_label }}">Предмет</label>{{ filter_form.subject }}</div>
+  <div class="ds-field"><label for="{{ filter_form.semester.id_for_label }}">Семестр</label>{{ filter_form.semester }}</div>
+  <div class="ds-field"><label for="{{ filter_form.material_type.id_for_label }}">Тип файла</label>{{ filter_form.material_type }}</div>
+  <label class="material-favorite-filter">{{ filter_form.favorites }} Только избранное</label>
+  <button class="ds-btn ds-btn-secondary">Применить</button>
+  {% if filtered %}<a class="study-text-link" href="{{ request.path }}">Сбросить</a>{% endif %}
+  <p class="material-filter-hint">Поиск и фильтры находят материалы во всех папках.</p>
+  {% if filter_form.errors %}<div class="ds-alert ds-alert-error" role="alert">{{ filter_form.errors }}</div>{% endif %}
+</form>
 
 <div class="study-drive-breadcrumb">
   <nav class="ds-breadcrumb" aria-label="Расположение папки">
@@ -38,8 +54,8 @@
   {% if query %}<div class="study-section-heading"><h2>Поиск: «{{ query }}»</h2><a class="study-text-link" href="{% if current_folder %}{% url 'materials_drive_folder' current_folder.id %}{% else %}{% url 'materials_drive_root' %}{% endif %}">Сбросить поиск <i class="fas fa-xmark" aria-hidden="true"></i></a></div>{% endif %}
   {% if total_items == 0 %}
   <div class="ds-empty"><i class="fas {% if query %}fa-magnifying-glass{% else %}fa-folder-open{% endif %}" aria-hidden="true"></i>
-    <span class="ds-empty-title">{% if query %}Ничего не найдено{% else %}Здесь будут учебные материалы{% endif %}</span>
-    <span class="ds-empty-desc">{% if query %}Проверьте название или попробуйте более короткий запрос.{% elif can_manage %}Загрузите первый файл. Папки помогут распределить материалы по курсам и темам.{% else %}Когда преподаватель добавит файлы, вы сможете открыть или скачать их здесь.{% endif %}</span>
+    <span class="ds-empty-title">{% if filtered %}По этим условиям материалов нет{% else %}Здесь будут учебные материалы{% endif %}</span>
+    <span class="ds-empty-desc">{% if filtered %}Измените фильтры или отметьте нужные файлы звёздочкой, чтобы они появились в избранном.{% elif can_manage %}Загрузите первый файл. Папки помогут распределить материалы по курсам и темам.{% else %}Когда преподаватель добавит файлы, вы сможете открыть или скачать их здесь.{% endif %}</span>
     {% if can_manage and not query %}<a class="ds-btn ds-btn-primary" href="{% url 'upload_material' %}{% if current_folder %}?folder={{ current_folder.id }}{% endif %}"><i class="fas fa-plus" aria-hidden="true"></i> Загрузить файл</a>{% endif %}
   </div>
   {% else %}
@@ -56,9 +72,10 @@
       <article class="study-material-card">
         <a href="{% url 'view_material' m.id %}" class="study-material-open">
           <span class="study-material-visual ds-file-{{ m.type }}">{% include 'study_material_icon.html' with material_type=m.type %}</span>
-          <span class="study-material-info"><strong title="{{ m.name }}">{{ m.name }}</strong><span>{{ m.get_type_display }} · {{ m.size|filesizeformat }}</span></span>
+          <span class="study-material-info"><strong title="{{ m.name }}">{{ m.name }}</strong><span>{{ m.get_type_display }} · {{ m.size|filesizeformat }}</span>{% include 'material_metadata.html' with material=m %}</span>
         </a>
         <div class="study-material-foot"><span>{{ m.upload_date|date:"d.m.Y" }}</span><div>
+          {% include 'material_favorite.html' with material=m %}
           <a href="{% url 'download_material' m.id %}" class="ds-icon-btn" title="Скачать" aria-label="Скачать {{ m.name }}" download><i class="fas fa-download" aria-hidden="true"></i></a>
           {% if can_manage %}<a href="{% url 'edit_material' m.id %}" class="ds-icon-btn" title="Изменить" aria-label="Изменить {{ m.name }}"><i class="fas fa-pen" aria-hidden="true"></i></a>
           <form method="post" action="{% url 'delete_material' m.id %}" class="study-inline-form" onsubmit="return confirm('Удалить материал?')">{% csrf_token %}<button type="submit" class="ds-icon-btn danger" title="Удалить" aria-label="Удалить {{ m.name }}"><i class="fas fa-trash" aria-hidden="true"></i></button></form>
@@ -79,10 +96,11 @@
     </div>{% endfor %}
     {% for m in materials %}<div class="ds-file-row">
       <span class="icon ds-file-{{ m.type }}">{% include 'study_material_icon.html' with material_type=m.type %}</span>
-      <a href="{% url 'view_material' m.id %}" class="name" title="{{ m.name }}">{{ m.name }}</a>
+      <a href="{% url 'view_material' m.id %}" class="name" title="{{ m.name }}">{{ m.name }}{% include 'material_metadata.html' with material=m %}</a>
       <span class="meta study-file-type">{{ m.get_type_display }}</span><span class="meta study-file-date">{{ m.upload_date|date:"d.m.Y" }} · {{ m.size|filesizeformat }}</span>
       <span class="actions">
         <a href="{% url 'download_material' m.id %}" class="ds-icon-btn" title="Скачать" aria-label="Скачать {{ m.name }}" download><i class="fas fa-download" aria-hidden="true"></i></a>
+        {% include 'material_favorite.html' with material=m %}
         {% if can_manage %}
         <a href="{% url 'edit_material' m.id %}" class="ds-icon-btn" title="Изменить" aria-label="Изменить {{ m.name }}"><i class="fas fa-pen" aria-hidden="true"></i></a>
         <form method="post" action="{% url 'delete_material' m.id %}" class="study-inline-form" onsubmit="return confirm('Удалить материал?')">{% csrf_token %}<button type="submit" class="ds-icon-btn danger" title="Удалить" aria-label="Удалить {{ m.name }}"><i class="fas fa-trash" aria-hidden="true"></i></button></form>
@@ -92,6 +110,7 @@
   </div>
   {% endif %}
 </section>
+{% include 'partials/study_pagination.html' with query=filter_query %}
 
 {% if can_manage %}
 <div class="ds-modal-scrim" id="dsCreateFolderModal">

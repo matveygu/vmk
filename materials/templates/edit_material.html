@@ -19,6 +19,7 @@
   <form method="post" enctype="multipart/form-data">
     {% csrf_token %}
     <div class="study-form-stack">
+      {% include 'material_metadata_fields.html' %}
 
       <div class="ds-field">
         <label for="{{ form.name.id_for_label }}">Название</label>

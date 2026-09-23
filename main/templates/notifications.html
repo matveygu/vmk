@@ -1,0 +1,14 @@
+{% extends 'ds_base.html' %}
+{% block title %}Уведомления — ВМК{% endblock %}
+{% block content %}
+<div class="study-workflow">
+<div class="ds-page-header"><div><h1>Уведомления</h1><p>Задания, изменения занятий и публикации факультета. Непрочитанных: {{ unread_count }}.</p></div>
+<form method="post" action="{% url 'notifications_read_all' %}">{% csrf_token %}<button class="ds-btn ds-btn-secondary" {% if not unread_count %}disabled{% endif %}>Прочитать все</button></form></div>
+<nav class="ds-segmented" aria-label="Фильтр уведомлений"><a href="?" {% if not only_unread %}class="active" aria-current="page"{% endif %}>Все</a><a href="?filter=unread" {% if only_unread %}class="active" aria-current="page"{% endif %}>Непрочитанные</a></nav>
+<div class="ws-stack">
+{% for item in page_obj %}<article class="ds-card ws-identity-card study-notification{% if item.read_at %} is-read{% endif %}"><span class="ws-section-kicker">{{ item.created_at|date:"j E H:i" }}{% if not item.read_at %} · Новое{% endif %}</span><h2>{{ item.title }}</h2><p>{{ item.body }}</p><div class="ds-actions"><a class="ds-btn ds-btn-secondary" href="{{ item.url }}">Открыть</a>{% if not item.read_at %}<form method="post" action="{% url 'notification_read' item.pk %}">{% csrf_token %}<button class="ds-btn ds-btn-secondary">Прочитано</button></form>{% endif %}</div></article>
+{% empty %}<div class="ds-card ds-empty"><h2>Уведомлений пока нет</h2><p>Здесь появятся новые задания и изменения расписания после их публикации.</p></div>{% endfor %}
+</div>
+{% include 'partials/study_pagination.html' with query=only_unread|yesno:'filter=unread,filter=all' %}
+</div>
+{% endblock %}

@@ -9,6 +9,8 @@ from urllib.parse import quote
 from main.admin_access import role_required
 from .models import Material, MaterialFolder
 from .forms import MaterialUploadForm, MaterialEditForm
+from .catalog import catalog_query, with_favorites
+from django.core.paginator import Paginator
 
 
 def is_headman_or_above(user):
@@ -131,7 +133,8 @@ def download_material(request, material_id):
 
 @login_required
 def view_material(request, material_id):
-    material = get_object_or_404(Material.objects.select_related('uploaded_by', 'folder'), id=material_id)
+    material = get_object_or_404(with_favorites(Material.objects.select_related('uploaded_by', 'folder', 'subject'),
+                                               request.user), id=material_id)
     
     # Список поддерживаемых видеоформатов
     video_formats = ['.mp4', '.webm', '.ogg', '.mov', '.avi', '.mkv', '.flv', '.m3u8']
@@ -222,10 +225,6 @@ def edit_material(request, material_id):
     if request.method == 'POST':
         form = MaterialEditForm(request.POST, request.FILES, instance=material)
         if form.is_valid():
-            # If replace_file is False, keep existing file
-            replace = form.cleaned_data.get('replace_file')
-            if not replace and 'file' in form.changed_data:
-                material.file = material.__class__.objects.get(pk=material.pk).file
             form.save()
             messages.success(request, 'Материал обновлён')
             # Redirect back to current folder if any
@@ -322,30 +321,7 @@ def drive_root(request):
     if request.session.get('selected_folder_id') is not None:
         request.session['selected_folder_id'] = None
 
-    query = request.GET.get('q', '').strip()
-    if query:
-        # Search looks across the whole drive, not just the top level
-        folders = MaterialFolder.objects.filter(name__icontains=query).order_by('name')
-        materials = Material.objects.filter(name__icontains=query).order_by('-upload_date')
-    else:
-        folders = MaterialFolder.objects.filter(parent_folder__isnull=True).order_by('name')
-        materials = Material.objects.filter(folder__isnull=True).order_by('-upload_date')
-
-    materials = _annotate_material_sizes(list(materials))
-    folders = _annotate_folder_stats(list(folders))
-    total_items = len(folders) + len(materials)
-
-    context = {
-        'current_folder': None,
-        'subfolders': folders,
-        'materials': materials,
-        'breadcrumbs': [],
-        'can_manage': is_teacher_or_admin_or_uploader(request.user),
-        'current_selected_folder': None,
-        'total_items': total_items,
-        'query': query,
-    }
-    return render(request, 'drive.html', context)
+    return _render_drive(request)
 
 
 @login_required
@@ -355,26 +331,24 @@ def drive_folder(request, folder_id: int):
     if request.session.get('selected_folder_id') != folder.id:
         request.session['selected_folder_id'] = folder.id
 
-    query = request.GET.get('q', '').strip()
-    if query:
-        subfolders = MaterialFolder.objects.filter(name__icontains=query).order_by('name')
-        materials = Material.objects.filter(name__icontains=query).order_by('-upload_date')
-    else:
-        subfolders = MaterialFolder.objects.filter(parent_folder=folder).order_by('name')
-        materials = Material.objects.filter(folder=folder).order_by('-upload_date')
+    return _render_drive(request, folder)
 
-    materials = _annotate_material_sizes(list(materials))
-    subfolders = _annotate_folder_stats(list(subfolders))
-    total_items = len(subfolders) + len(materials)
 
-    # Build breadcrumbs up the tree
+def _render_drive(request, folder=None):
+    form, items, folders, filtered = catalog_query(request, folder)
+    page = Paginator(items, 36).get_page(request.GET.get('page'))
+    materials = _annotate_material_sizes(list(page.object_list))
+    subfolders = _annotate_folder_stats(list(folders))
     breadcrumbs = []
     current = folder
-    while current is not None:
+    seen = set()
+    while current is not None and current.pk not in seen:
+        seen.add(current.pk)
         breadcrumbs.append(current)
         current = current.parent_folder
     breadcrumbs.reverse()
-
+    params = request.GET.copy()
+    params.pop('page', None)
     context = {
         'current_folder': folder,
         'subfolders': subfolders,
@@ -382,8 +356,10 @@ def drive_folder(request, folder_id: int):
         'breadcrumbs': breadcrumbs,
         'can_manage': is_teacher_or_admin_or_uploader(request.user),
         'current_selected_folder': folder,
-        'total_items': total_items,
-        'query': query,
+        'total_items': len(subfolders) + page.paginator.count,
+        'query': request.GET.get('q', '').strip()[:200],
+        'filter_form': form, 'filtered': filtered, 'page_obj': page,
+        'filter_query': params.urlencode(),
     }
     return render(request, 'drive.html', context)
 

@@ -45,7 +45,7 @@ def annotate_timing(lessons, day, now):
         lesson.timing_day_start = milliseconds(day_start)
         lesson.timing_day_end = milliseconds(day_end)
         start, end = parse_lesson_time(lesson.time), parse_lesson_time(lesson.time_end)
-        if not start or not end or end <= start or lesson.week_parity not in ('all', date_parity(day)):
+        if getattr(lesson, 'cancelled', False) or not start or not end or end <= start or lesson.week_parity not in ('all', date_parity(day)):
             continue
         lesson.timing_start = milliseconds(datetime.combine(day, start, CAMPUS_TIMEZONE))
         lesson.timing_end = milliseconds(datetime.combine(day, end, CAMPUS_TIMEZONE))

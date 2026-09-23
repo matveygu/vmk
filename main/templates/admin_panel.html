@@ -1,6 +1,7 @@
 {% extends 'admin_base.html' %}
 {% block title %}Администрирование — Портал ВМК МГУ{% endblock %}
 {% block admin_content %}
+<p class="ws-muted">Версия: {{ build_version }} · База данных: {{ database_vendor }}</p>
 <div class="ds-page-header adm-hub-heading"><div><span class="ds-eyebrow">Управление порталом</span><h1>Что будем редактировать?</h1><p>Выберите раздел. Все изменения сохраняются в общей базе портала.</p></div></div>
 <div class="adm-hub-grid">
   <a href="{% url 'admin_users' %}" class="ds-card adm-hub-card">

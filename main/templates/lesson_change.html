@@ -1,0 +1,11 @@
+{% extends 'admin_base.html' %}
+{% block title %}Изменение пары на дату — ВМК{% endblock %}
+{% block admin_content %}
+<div class="ds-page-header"><div><h1>Изменение на одну дату</h1><p>{{ lesson.subject.name }} · группа {{ lesson.group.number }} · {{ lesson.day }}. Можно заменить предмет, время, аудиторию или отменить пару.</p></div><a class="ds-btn ds-btn-secondary" href="{% url 'admin_schedule' %}?group={{ lesson.group_id }}">К расписанию</a></div>
+<div class="ds-card study-editor">
+<form method="get" class="ds-actions"><label for="change-date">Посмотреть дату</label><input id="change-date" class="ds-input" type="date" name="date" value="{{ selected_date|date:'Y-m-d' }}"><button class="ds-btn ds-btn-secondary">Показать</button></form>
+<form method="post">{% csrf_token %}{{ form.as_p }}<button class="ds-btn ds-btn-primary">Сохранить на эту дату</button></form>
+{% if existing %}<form method="post">{% csrf_token %}<input type="hidden" name="date" value="{{ selected_date|date:'Y-m-d' }}"><input type="hidden" name="action" value="restore"><button class="ds-btn ds-btn-secondary">Вернуть обычное расписание на эту дату</button></form>{% endif %}
+</div>
+<section class="ds-card ws-identity-card"><h2>Сохранённые изменения этой пары</h2>{% for change in changes %}<p><a href="?date={{ change.date|date:'Y-m-d' }}">{{ change.date|date:"j E Y" }}</a> · {% if change.cancelled %}Отменена{% else %}{{ change.subject.name }} · {{ change.start|time:'H:i' }}–{{ change.end|time:'H:i' }} · {{ change.classroom }}{% endif %}</p>{% empty %}<p>Изменений пока нет.</p>{% endfor %}</section>
+{% endblock %}

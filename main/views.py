@@ -18,6 +18,10 @@ from django.contrib import messages
 from .forms import NewsForm
 from schedule.models import Schedule, Homework
 from schedule.timing import annotate_timing, campus_now, date_parity, milliseconds
+from schedule.occurrences import apply_changes
+from schedule.progress import visible_homework, with_progress
+from django.db import transaction
+from .notifications import notify
 
 
 def is_teacher_or_above(user):
@@ -130,12 +134,16 @@ def home(request):
             ))
             for lesson in today_schedule:
                 lesson.today_homework = lesson.date_homework[0] if lesson.date_homework else None
+            today_schedule = apply_changes(today_schedule, schedule_date)
             annotate_timing(today_schedule, schedule_date, now)
 
         published_news = News.objects.filter(is_published=True).select_related('author').order_by('-created_at')
 
         context = {
             'today_schedule': today_schedule,
+            'upcoming_homework': with_progress(visible_homework(request.user), request.user)
+                .filter(is_completed=False, due_date__gte=schedule_date)
+                .select_related('subject', 'schedule__subject').order_by('due_date', 'pk')[:3],
             'latest_news': published_news[:3],
             'news_total_count': published_news.count(),
             'today': schedule_date,
@@ -241,22 +249,24 @@ def news_list(request):
 
 @login_required
 def homework_list(request):
-    """Список домашних заданий пользователя/группы"""
-    from schedule.models import Homework
-
-    if request.user.role == 'teacher':
-        items = Homework.objects.filter(schedule__first_teacher_id=request.user.student_id)
-    elif request.user.group:
-        items = Homework.objects.filter(group=request.user.group)
-    else:
-        items = Homework.objects.none()
-
-    items = items.select_related('schedule__subject', 'subject').order_by('due_date', '-assigned_date')
-
-    context = {
-        'items': items,
-        'active_count': items.filter(due_date__gte=date.today()).count(),
-    }
+    from django.core.paginator import Paginator
+    from schedule.progress import visible_homework, with_progress
+    today = campus_now().date()
+    items = with_progress(visible_homework(request.user), request.user)
+    status = request.GET.get('status', 'todo')
+    if status not in ('todo', 'overdue', 'done', 'all'):
+        status = 'todo'
+    active_count = items.filter(is_completed=False).count()
+    if status == 'done':
+        items = items.filter(is_completed=True)
+    elif status == 'overdue':
+        items = items.filter(is_completed=False, due_date__lt=today)
+    elif status == 'todo':
+        items = items.filter(is_completed=False)
+    page = Paginator(items.select_related('schedule__subject', 'subject')
+                     .order_by('due_date', '-assigned_date', '-pk'), 30).get_page(request.GET.get('page'))
+    context = {'items': page.object_list, 'page_obj': page, 'status': status,
+               'active_count': active_count, 'today': today}
     return render(request, 'homework.html', context)
 
 
@@ -269,7 +279,10 @@ def add_news(request):
         if form.is_valid():
             news = form.save(commit=False)
             news.author = request.user
-            news.save()
+            with transaction.atomic():
+                news.save()
+                if news.is_published:
+                    notify(CustomUser.objects.all(), 'Новая публикация', news.title, reverse('news_list'))
             messages.success(request, 'Новость успешно добавлена')
             return redirect(next_url)
     else:

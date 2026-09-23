@@ -1,4 +1,4 @@
-{% load schedule_links %}
+{% load schedule_links notification_tags %}
 <div class="ds-scrim" onclick="dsCloseSidenav()" aria-hidden="true"></div>
 <nav class="ds-sidenav" id="dsSidenav" aria-label="{% if user.is_authenticated %}Личный кабинет{% else %}Разделы портала{% endif %}">
   <div class="ds-sidenav-head">
@@ -12,6 +12,8 @@
     {% if user.is_authenticated %}
     <div>
       <span class="ds-sidenav-group-label">Моя учёба</span>
+      {% unread_notifications as unread_total %}
+      <a class="ds-sidenav-item{% if request.resolver_match.url_name == 'notifications' %} active{% endif %}" href="{% url 'notifications' %}"><i class="far fa-bell" aria-hidden="true"></i> Уведомления{% if unread_total %}<span class="study-unread" aria-label="Непрочитанных: {{ unread_total }}">{{ unread_total }}</span>{% endif %}</a>
       <a class="ds-sidenav-item{% if request.resolver_match.url_name == 'home' %} active{% endif %}" href="{% url 'home' %}"><i class="fas fa-house" aria-hidden="true"></i> Главная</a>
       <a class="ds-sidenav-item{% if request.resolver_match.app_name != 'admin' and request.path|slice:':10' == '/schedule/' %} active{% endif %}" href="{% today_schedule_url %}"><i class="fas fa-calendar-days" aria-hidden="true"></i> Расписание</a>
       <a class="ds-sidenav-item{% if request.resolver_match.url_name == 'homework_list' %} active{% endif %}" href="{% url 'homework_list' %}"><i class="fas fa-list-check" aria-hidden="true"></i> Домашние задания</a>

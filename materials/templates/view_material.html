@@ -16,8 +16,10 @@
       {{ material.name }}
     </h1>
     <p>Просмотр файла и всё необходимое для работы с ним.</p>
+    {% include 'material_metadata.html' %}
   </div>
   <div class="ds-actions">
+    {% include 'material_favorite.html' %}
     <a href="{% url 'download_material' material.id %}" class="ds-btn ds-btn-primary"><i class="fas fa-download" aria-hidden="true"></i> Скачать файл</a>
   </div>
 </div>

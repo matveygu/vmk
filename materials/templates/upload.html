@@ -30,6 +30,7 @@
 
   <form method="post" enctype="multipart/form-data" id="dsUploadForm" class="study-form-stack study-upload-form" novalidate>
     {% csrf_token %}
+    {% include 'material_metadata_fields.html' %}
 
     <div class="ds-field">
       <label for="dsFolderPath">Папка назначения</label>

@@ -1,0 +1,1 @@
+{% if material.subject or material.semester %}<span class="material-metadata">{% if material.subject %}{{ material.subject.name }}{% endif %}{% if material.semester %}{% if material.subject %} · {% endif %}{{ material.semester }} семестр{% endif %}</span>{% endif %}

@@ -21,6 +21,8 @@
     <link href="{% static 'css/ds/workspace.css' %}?v=20260912-3" rel="stylesheet">
     <link href="{% static 'css/ds/study.css' %}?v=20260912-3" rel="stylesheet">
     {% block extra_css %}{% endblock %}
+    <link href="{% static 'css/ds/study_workflow.css' %}?v=20260923-1" rel="stylesheet">
+    <link href="{% static 'css/ds/material_catalog.css' %}?v=20260923-1" rel="stylesheet">
 </head>
 <body class="ds-scope {% if user.is_authenticated %}ds-private{% else %}ds-public{% endif %}" id="dsBody">
     <a href="#main-content" class="ds-skip-link">Перейти к содержимому</a>
@@ -47,6 +49,7 @@
         <a href="https://cs.msu.ru/" target="_blank" rel="noopener">Сайт факультета <i class="fas fa-arrow-up-right-from-square" aria-hidden="true"></i></a>
       </div>
     </footer>
+    {% include 'partials/ds_mobile_nav.html' %}
     <script src="{% static 'js/portal.js' %}?v=20260912-3"></script>
     {% block extra_js %}{% endblock %}
 </body>

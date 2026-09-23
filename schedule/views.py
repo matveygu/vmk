@@ -11,6 +11,9 @@ from main.admin_access import role_required
 from .models import Schedule, Subject, Homework, Group
 from .forms import HomeworkForm, GroupSelectForm
 from .timing import annotate_timing, campus_now, date_parity, milliseconds
+from .occurrences import apply_changes
+from django.db import transaction
+from main.notifications import notify_group
 
 
 def is_headman_or_above(user):
@@ -106,6 +109,7 @@ def schedule_view(request):
             homework_by_schedule[dz.schedule_id] = dz
     for lesson in schedule:
         lesson.day_homework = homework_by_schedule.get(lesson.id)
+    schedule = apply_changes(schedule, current_date)
     annotate_timing(schedule, current_date, now)
 
     week_schedule = []
@@ -117,6 +121,7 @@ def schedule_view(request):
         week_schedule.sort(key=lambda lesson: (day_indices[lesson.day], lesson.lesson_number))
         for lesson in week_schedule:
             lesson.row_date = week_dates[day_indices[lesson.day]]
+        week_schedule = apply_changes(week_schedule)
         for day in week_dates:
             annotate_timing([row for row in week_schedule if row.row_date == day], day, now)
 
@@ -139,10 +144,22 @@ def schedule_view(request):
 
 
 def public_schedule_view(request):
-    form = GroupSelectForm(request.GET or None)
+    data = request.GET.copy()
+    selected_date = campus_now().date()
+    try:
+        if data.get('date'):
+            selected_date = date.fromisoformat(data['date'])
+            if not 2 <= selected_date.year <= 9998:
+                raise ValueError
+            data['day'] = get_day_name_from_weekday(selected_date.weekday())
+        elif data.get('day') in WEEK_DAY_NAMES:
+            selected_date += timedelta(days=WEEK_DAY_NAMES.index(data['day']) - selected_date.weekday())
+    except ValueError:
+        selected_date = campus_now().date()
+    form = GroupSelectForm(data or None)
     schedule_data = None
     group = None
-    current_day = request.GET.get('day') or ''
+    current_day = data.get('day') or ''
     current_parity = request.GET.get('parity', 'all')
     if current_parity not in ['all', 'even', 'odd']:
         current_parity = 'all'
@@ -151,16 +168,14 @@ def public_schedule_view(request):
         group = form.cleaned_data.get('group')
         day = form.cleaned_data.get('day')
         if not day:
-            day = get_day_name_from_weekday(date.today().weekday())
-            if day not in WEEK_DAY_NAMES:
-                day = WEEK_DAY_NAMES[0]
+            day = get_day_name_from_weekday(selected_date.weekday())
         current_day = day
 
         if group:
             schedule_data = Schedule.objects.filter(group_id=group.id, day=day).select_related('subject')
             if current_parity != 'all':
                 schedule_data = schedule_data.filter(Q(week_parity='all') | Q(week_parity=current_parity))
-            schedule_data = schedule_data.order_by('lesson_number')
+            schedule_data = apply_changes(list(schedule_data.order_by('lesson_number')), selected_date)
 
     if not current_day:
         current_day = WEEK_DAY_NAMES[0]
@@ -172,6 +187,9 @@ def public_schedule_view(request):
         'current_day': current_day,
         'current_parity': current_parity,
         'schedule': schedule_data,
+        'selected_date': selected_date,
+        'dated_days': [(name, short, selected_date + timedelta(days=index-selected_date.weekday()))
+                       for index, (name, short) in enumerate(zip(WEEK_DAY_NAMES, WEEK_DAY_SHORT_NAMES))],
     }
     return render(request, 'public.html', context)
 
@@ -219,7 +237,10 @@ def add_homework(request, schedule_id):
             homework.assigned_date = date.today()  # ⚡ автоматически ставим дату выдачи
             homework.group = schedule.group
             homework.subject = schedule.subject
-            homework.save()
+            with transaction.atomic():
+                homework.save()
+                notify_group(schedule, 'Новое домашнее задание',
+                    f'{schedule.subject.name}. Срок: {homework.due_date or "не указан"}.', reverse('homework_list'))
             return redirect('schedule_detail', schedule_id=schedule.id)
     else:
         form = HomeworkForm()

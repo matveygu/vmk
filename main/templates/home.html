@@ -36,6 +36,7 @@
           <div class="ws-lesson-content">
             <div class="ws-lesson-topline"><span>{{ lesson.lesson_number }} пара</span>{% if lesson.week_parity != "all" %}<span>{{ lesson.get_week_parity_display }}</span>{% endif %}{% include 'partials/lesson_timing_label.html' %}</div>
             <h3>{{ lesson.subject.name }}</h3>
+            {% include 'partials/lesson_change_label.html' %}
             <div class="ws-lesson-details"><span>{{ lesson.first_teacher_name|default:"Преподаватель не указан" }}</span>{% if lesson.classroom %}<span><i class="fas fa-location-dot" aria-hidden="true"></i> {{ lesson.classroom }}{% if lesson.another_classroom %} / {{ lesson.another_classroom }}{% endif %}</span>{% endif %}</div>
             {% if lesson.today_homework %}
             <details class="ws-lesson-homework">
@@ -89,6 +90,7 @@
   </div>
 
   <aside class="ws-stack" aria-label="Ваш профиль и полезные ссылки">
+    <section class="ds-card ws-identity-card"><span class="ws-section-kicker">Не забыть</span><h2>Ближайшие задания</h2>{% for hw in upcoming_homework %}<p><strong>{{ hw.subject.name|default:hw.schedule.subject.name }}</strong><br><span class="ws-muted">До {{ hw.due_date|date:"j E" }}</span><br>{{ hw.content|truncatechars:90 }}</p>{% empty %}<p class="ws-muted">Нет невыполненных заданий с ближайшим сроком.</p>{% endfor %}<a class="ws-text-link" href="{% url 'homework_list' %}">Все задания и просроченные <i class="fas fa-arrow-right" aria-hidden="true"></i></a></section>
     <section class="ds-card ws-identity-card">
       <span class="ws-section-kicker">Ваш профиль</span>
       <div class="ws-identity-person">{% if user.photo %}<img src="{{ user.photo.url }}" class="ws-person-avatar" alt="">{% else %}<span class="ws-person-avatar" aria-hidden="true">{{ user.name|default:user.student_id|slice:":1"|upper }}</span>{% endif %}<div><strong>{{ user.name|default:user.student_id }}</strong><span class="ds-role-badge ds-role-{{ user.role }}">{{ user.get_role_display }}</span></div></div>

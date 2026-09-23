@@ -5,6 +5,8 @@ from django.http import QueryDict
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from django.views.decorators.http import require_GET, require_http_methods, require_POST
+import os
+from django.db import connection
 
 from schedule.models import Schedule
 from .admin_access import admin_required
@@ -30,7 +32,10 @@ def _users_url(query=''):
 @admin_required
 @require_GET
 def admin_panel(request):
-    return render(request, 'admin_panel.html', {'stats': {
+    return render(request, 'admin_panel.html', {
+        'build_version': os.environ.get('PORTAL_BUILD_VERSION', 'Локальная разработка'),
+        'database_vendor': connection.vendor,
+        'stats': {
         'users': CustomUser.objects.count(),
         'groups': Group.objects.count(),
         'schedule': Schedule.objects.count(),

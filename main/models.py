@@ -150,3 +150,16 @@ class News(models.Model):
         if len(self.content) > 100:
             return self.content[:100] + '...'
         return self.content
+
+
+class Notification(models.Model):
+    recipient = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='notifications')
+    title = models.CharField(max_length=200)
+    body = models.TextField(blank=True)
+    url = models.CharField(max_length=300)
+    created_at = models.DateTimeField(auto_now_add=True)
+    read_at = models.DateTimeField(null=True, blank=True)
+
+    class Meta:
+        ordering = ['-created_at', '-pk']
+        indexes = [models.Index(fields=['recipient', 'read_at'], name='notification_recipient_read')]

@@ -100,3 +100,30 @@ class Schedule(models.Model):
     def get_homework_for_date(self, target_date):
         """Получить ДЗ для конкретной даты"""
         return self.homework_assignments.filter(assigned_date=target_date).first()
+
+
+class HomeworkCompletion(models.Model):
+    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
+    homework = models.ForeignKey(Homework, on_delete=models.CASCADE, related_name='completions')
+    completed_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        constraints = [models.UniqueConstraint(fields=['user', 'homework'], name='unique_homework_completion')]
+
+
+class LessonChange(models.Model):
+    """An exception for one occurrence; the recurring Schedule stays intact."""
+    schedule = models.ForeignKey(Schedule, on_delete=models.CASCADE, related_name='date_changes')
+    date = models.DateField('Дата занятия', db_index=True)
+    cancelled = models.BooleanField('Отменить занятие', default=False)
+    subject = models.ForeignKey(Subject, on_delete=models.PROTECT, verbose_name='Предмет')
+    start = models.TimeField('Начало')
+    end = models.TimeField('Окончание')
+    classroom = models.CharField('Аудитория', max_length=50)
+    note = models.CharField('Причина / пояснение', max_length=250, blank=True)
+    updated_by = models.ForeignKey(CustomUser, on_delete=models.SET_NULL, null=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        constraints = [models.UniqueConstraint(fields=['schedule', 'date'], name='unique_lesson_change_date')]
+        ordering = ['-date', '-pk']

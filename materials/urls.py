@@ -1,7 +1,9 @@
 from django.urls import path
 from . import views
+from .catalog import set_favorite
 
 urlpatterns = [
+    path('favorite/<int:material_id>/', set_favorite, name='material_favorite'),
     # Drive-style browsing
     path('drive/', views.drive_root, name='materials_drive_root'),
     path('drive/<int:folder_id>/', views.drive_folder, name='materials_drive_folder'),

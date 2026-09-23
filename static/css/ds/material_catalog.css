@@ -1,0 +1,26 @@
+.material-filters { display: flex; flex-wrap: wrap; gap: 16px; align-items: flex-end; padding: 20px; margin-bottom: 20px; }
+.material-filters .ds-field { flex: 1 1 170px; min-width: 0; }
+.material-filters .ds-field:first-of-type { flex-grow: 2; }
+.material-filters .ds-select { width: 100%; max-width: 100%; }
+.material-favorite-filter { display: flex; align-items: center; gap: 8px; min-height: 44px; font-size: 13px; color: var(--ds-text-body); cursor: pointer; }
+.material-favorite-filter input { width: 18px; height: 18px; accent-color: var(--ds-brand-primary); }
+.material-filter-hint { width: 100%; margin: 0; color: var(--ds-text-muted); font-size: 12px; line-height: 1.6; }
+.material-metadata-fields { display: grid; grid-template-columns: minmax(0, 2fr) minmax(0, 1fr); gap: 16px; }
+.material-metadata { display: block; margin-top: 5px; font-size: 12px; line-height: 1.5; color: var(--ds-text-muted); overflow-wrap: anywhere; }
+.material-favorite.is-active { color: var(--ds-warning-fg); background: var(--ds-warning-bg); }
+.material-favorite:focus-visible, .study-mobile-nav a:focus-visible { outline: 2px solid var(--ds-border-focus); outline-offset: 2px; }
+.study-mobile-nav { display: none; }
+@media (max-width: 700px) {
+  .ds-private { padding-bottom: calc(76px + env(safe-area-inset-bottom, 0px)); }
+  .study-mobile-nav { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); position: fixed; inset: auto 0 0; z-index: 35; padding: 6px 8px calc(6px + env(safe-area-inset-bottom, 0px)); border-top: 1px solid var(--ds-border-subtle); background: var(--ds-surface-card); box-shadow: 0 -3px 16px rgba(0,0,0,.04); }
+  .study-mobile-nav a { display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 5px; min-height: 52px; border-radius: 10px; text-decoration: none; color: var(--ds-text-muted); font-size: 11px; }
+  .study-mobile-nav i { font-size: 18px; }
+  .study-mobile-nav a[aria-current] { color: var(--ds-text-link); background: var(--ds-brand-primary-soft); }
+  .ds-sidenav-open .study-mobile-nav { visibility: hidden; }
+  .material-filters { padding: 16px; gap: 12px; }
+  .material-filters .ds-field { flex-basis: calc(50% - 12px); }
+  .material-filters .ds-field:first-of-type { flex-basis: 100%; }
+  .material-metadata-fields { grid-template-columns: 1fr; }
+  .study-material-foot .ds-icon-btn, .study-file-list .ds-icon-btn { min-width: 44px; min-height: 44px; }
+}
+@media print { .study-mobile-nav { display: none; } }

@@ -1,0 +1,9 @@
+{% load schedule_links %}
+{% if user.is_authenticated %}
+<nav class="study-mobile-nav" aria-label="Быстрая навигация">
+  <a href="{% url 'home' %}" {% if request.resolver_match.url_name == 'home' %}aria-current="page"{% endif %}><i class="fas fa-house" aria-hidden="true"></i><span>Главная</span></a>
+  <a href="{% today_schedule_url %}" {% if request.path|slice:':10' == '/schedule/' %}aria-current="page"{% endif %}><i class="far fa-calendar-days" aria-hidden="true"></i><span>Пары</span></a>
+  <a href="{% url 'homework_list' %}" {% if request.path|slice:':10' == '/homework/' %}aria-current="page"{% endif %}><i class="fas fa-list-check" aria-hidden="true"></i><span>Задания</span></a>
+  <a href="{% url 'materials_drive_root' %}" {% if request.path|slice:':11' == '/materials/' %}aria-current="page"{% endif %}><i class="far fa-folder-open" aria-hidden="true"></i><span>Материалы</span></a>
+</nav>
+{% endif %}

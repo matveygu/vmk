@@ -9,6 +9,7 @@
     <span class="ds-eyebrow">Расписание</span>
     <h1>{{ schedule.subject }}</h1>
     <p>{{ schedule.group }} · ауд. {{ schedule.classroom }}{% if schedule.week_parity != "all" %} · {{ schedule.get_week_parity_display }}{% endif %}</p>
+    {% if user.is_authenticated %}<a class="study-text-link" href="{% url 'materials_drive_root' %}?subject={{ schedule.subject_id }}">Материалы по предмету <i class="fas fa-arrow-right" aria-hidden="true"></i></a>{% endif %}
   </div>
   {% if user|has_role:"headman,teacher,admin" %}
   <div class="ds-actions">

@@ -11,6 +11,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends gosu \
 COPY requirements.txt ./
 RUN pip install --no-cache-dir -r requirements.txt
 COPY . .
+ARG PORTAL_BUILD_VERSION=unversioned
+ENV PORTAL_BUILD_VERSION=$PORTAL_BUILD_VERSION
 # Works even when checked out on Windows with CRLF conversion enabled.
 RUN sed -i 's/\r$//' /app/docker/entrypoint.sh
 ENTRYPOINT ["sh", "/app/docker/entrypoint.sh"]

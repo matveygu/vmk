@@ -1,5 +1,7 @@
 from django import forms
+from django.core.files.uploadedfile import UploadedFile
 from .models import Material, MaterialFolder
+from schedule.models import Subject
 from django.core.exceptions import ValidationError
 import os
 
@@ -41,13 +43,16 @@ class MaterialUploadForm(forms.ModelForm):
     class Meta:
         model = Material
         # 'type' is inferred from file extension, user should not select it
-        fields = ['file', 'folder']  # name taken from filename automatically
+        fields = ['file', 'folder', 'subject', 'semester']
         widgets = {
             'folder': forms.Select(attrs={'class': 'form-control'}),
         }
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        for name in ('subject', 'semester'):
+            self.fields[name].widget.attrs['class'] = 'ds-select'
+        self.fields['subject'].queryset = Subject.objects.order_by('name', 'pk')
 
     def save(self, commit=True):
         instance = super().save(commit=False)
@@ -72,6 +77,18 @@ class MaterialUploadForm(forms.ModelForm):
 
 class MaterialFilterForm(forms.Form):
     material_type = forms.ChoiceField(choices=[('', 'Все типы')] + Material.TYPES, required=False)
+    q = forms.CharField(required=False, max_length=200, label='Название')
+    subject = forms.ModelChoiceField(Subject.objects.order_by('name', 'pk'), required=False,
+                                    empty_label='Все предметы', label='Предмет')
+    semester = forms.TypedChoiceField(required=False, coerce=int, empty_value=None,
+        choices=[('', 'Все семестры')] + [(n, str(n)) for n in range(1, 13)], label='Семестр')
+    favorites = forms.BooleanField(required=False, label='Только избранное')
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        for name in ('subject', 'semester', 'material_type'):
+            self.fields[name].widget.attrs['class'] = 'ds-select'
+        self.fields['material_type'].label = 'Тип файла'
 
 
 class MaterialEditForm(forms.ModelForm):
@@ -79,11 +96,18 @@ class MaterialEditForm(forms.ModelForm):
 
     class Meta:
         model = Material
-        fields = ['name', 'file']
+        fields = ['name', 'file', 'subject', 'semester']
         widgets = {
             'name': forms.TextInput(attrs={'class': 'form-control'}),
             'file': forms.ClearableFileInput(attrs={'class': 'form-control'}),
         }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.original_file = self.instance.file
+        for name in ('subject', 'semester'):
+            self.fields[name].widget.attrs['class'] = 'ds-select'
+        self.fields['subject'].queryset = Subject.objects.order_by('name', 'pk')
 
     def save(self, commit=True):
         instance = super().save(commit=False)
@@ -91,15 +115,16 @@ class MaterialEditForm(forms.ModelForm):
         if not self.cleaned_data.get('replace_file'):
             self.fields['file'].required = False
             if 'file' in self.changed_data:
-                instance.file = self.instance.file
+                instance.file = self.original_file
         if commit:
             instance.save()
         return instance
 
     def clean_file(self):
         f = self.cleaned_data.get('file')
-        # Allow empty if not replacing
-        if not f:
+        # Validate new uploads only; metadata edits must not read remote storage
+        # or fail because an existing file is temporarily unavailable.
+        if not isinstance(f, UploadedFile):
             return f
         ext = os.path.splitext(f.name)[1].lower()
         if ext not in ALLOWED_MATERIAL_EXTENSIONS:

@@ -14,7 +14,7 @@ from main.admin_access import admin_required
 from main.admin_schedule_forms import (
     AdminScheduleForm, AdminSubjectForm, ScheduleDeleteForm, ScheduleFilterForm, SubjectSearchForm,
 )
-from schedule.models import Homework, Schedule, Subject
+from schedule.models import Homework, LessonChange, Schedule, Subject
 
 
 def _filter_context(request, *, listing=False, lesson=None):
@@ -168,10 +168,12 @@ def admin_subject_delete(request, subject_id):
         context = _filter_context(request)
         lesson_count = Schedule.objects.filter(subject=subject).count()
         homework_count = Homework.objects.filter(subject=subject).count()
-        used = bool(lesson_count or homework_count)
+        change_count = LessonChange.objects.filter(subject=subject).count()
+        used = bool(lesson_count or homework_count or change_count)
         if request.method == 'POST' and not used:
             subject.delete()
             messages.success(request, 'Предмет удалён из справочника.')
             return redirect(_subject_back(context))
-        context.update(subject=subject, lesson_count=lesson_count, homework_count=homework_count, used=used, subject_back_url=_subject_back(context))
+        context.update(subject=subject, lesson_count=lesson_count, homework_count=homework_count,
+                       change_count=change_count, used=used, subject_back_url=_subject_back(context))
         return render(request, 'admin_schedule_subject_delete.html', context, status=409 if request.method == 'POST' and used else 200)

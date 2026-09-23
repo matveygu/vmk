@@ -19,15 +19,16 @@
       <form method="get" class="study-inline-form">
         {{ form.group }}
         {{ form.day.as_hidden }}
+        <label for="public-date">Дата</label><input class="ds-input" id="public-date" type="date" name="date" value="{{ selected_date|date:'Y-m-d' }}">
+        <button type="submit" class="ds-btn ds-btn-secondary">Показать</button>
         <input type="hidden" name="parity" value="{{ current_parity }}">
-        <noscript><button type="submit" class="ds-btn ds-btn-secondary">Показать</button></noscript>
       </form>
     </div>
   </div>
 
   <nav class="ds-day-tabs study-day-tabs" aria-label="Дни недели">
-    {% for value, short in week_days %}
-    <a class="ds-day-tab{% if value == current_day %} active{% endif %}" {% if value == current_day %}aria-current="date"{% endif %} href="?group={{ group.pk|default:'' }}&day={{ value }}&parity={{ current_parity }}">
+    {% for value, short, day_date in dated_days %}
+    <a class="ds-day-tab{% if value == current_day %} active{% endif %}" {% if value == current_day %}aria-current="date"{% endif %} href="?group={{ group.pk|default:'' }}&date={{ day_date|date:'Y-m-d' }}&parity={{ current_parity }}">
       <span class="name">{{ short }}</span>
     </a>
     {% endfor %}
@@ -36,9 +37,9 @@
   <div class="study-calendar-filters">
     <span class="study-caption">Чётность недели</span>
     <div class="ds-segmented" aria-label="Чётность недели">
-      <a class="{% if current_parity == 'all' %}active{% endif %}" href="?group={{ group.pk|default:'' }}&day={{ current_day }}&parity=all">Все</a>
-      <a class="{% if current_parity == 'odd' %}active{% endif %}" href="?group={{ group.pk|default:'' }}&day={{ current_day }}&parity=odd">Нечётная</a>
-      <a class="{% if current_parity == 'even' %}active{% endif %}" href="?group={{ group.pk|default:'' }}&day={{ current_day }}&parity=even">Чётная</a>
+      <a class="{% if current_parity == 'all' %}active{% endif %}" href="?group={{ group.pk|default:'' }}&date={{ selected_date|date:'Y-m-d' }}&parity=all">Все</a>
+      <a class="{% if current_parity == 'odd' %}active{% endif %}" href="?group={{ group.pk|default:'' }}&date={{ selected_date|date:'Y-m-d' }}&parity=odd">Нечётная</a>
+      <a class="{% if current_parity == 'even' %}active{% endif %}" href="?group={{ group.pk|default:'' }}&date={{ selected_date|date:'Y-m-d' }}&parity=even">Чётная</a>
     </div>
   </div>
 </section>
@@ -52,6 +53,7 @@
   </div>
 </div>
 {% else %}
+<p class="study-caption">Дата: {{ selected_date|date:"j E Y" }}. Изменения и отмены относятся только к выбранной дате.</p>
 <section class="ds-card ds-card-flush study-day-schedule">
   <div class="study-section-heading"><h2>{{ current_day }} <span>Группа {{ group.number }}</span></h2>{% if schedule %}<span class="study-caption">Занятий: {{ schedule|length }}</span>{% endif %}</div>
   {% for lesson in schedule %}
@@ -61,6 +63,7 @@
       <span class="ds-lesson-time">{{ lesson.time }}{% if lesson.time_end %}<span>{{ lesson.time_end }}</span>{% endif %}</span></div>
       <div class="ds-lesson-main">
         <div class="ds-lesson-subject">{{ lesson.subject.name }}</div>
+        {% include 'partials/lesson_change_label.html' %}
         <div class="ds-lesson-meta">
           {{ lesson.first_teacher_name|default:"—" }}{% if lesson.second_teacher_id %} / {{ lesson.second_teacher_name }}{% endif %}
           {% if lesson.week_parity != "all" %}<span class="study-parity">{{ lesson.get_week_parity_display }}</span>{% endif %}

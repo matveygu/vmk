@@ -1,0 +1,19 @@
+.study-unread { margin-left: auto; padding: 2px 7px; border-radius: 12px; background: var(--ds-brand-primary-soft); color: var(--ds-text-link); font-size: 12px; }
+.study-change-label { display: block; width: fit-content; margin: 8px 0; padding: 6px 10px; border-radius: 8px; background: var(--ds-info-bg); color: var(--ds-info-fg); font-size: 12px; line-height: 1.5; overflow-wrap: anywhere; }
+.study-change-label.is-cancelled { background: var(--ds-neutral-bg); color: var(--ds-neutral-fg); }
+.study-workflow .ds-segmented { display: flex; flex-wrap: wrap; width: fit-content; max-width: 100%; margin: 0 0 20px; gap: 4px; }
+.study-workflow .ws-homework-content + form { margin: 14px 0; flex-wrap: wrap; }
+.study-editor { max-width: 760px; padding: 24px; }
+.study-editor > form + form { border-top: 1px solid var(--ds-border-subtle); margin-top: 24px; padding-top: 24px; }
+.study-editor p { margin: 0 0 16px; }
+.study-editor label { display: block; margin-bottom: 6px; font-size: 14px; }
+.study-editor .errorlist { color: var(--ds-error-fg); padding-left: 20px; font-size: 13px; }
+.study-editor input[type="checkbox"] { width: 20px; height: 20px; accent-color: var(--ds-brand-primary); }
+.study-editor .ds-actions { flex-wrap: wrap; }
+.study-editor .ds-actions > .ds-input { width: auto; }
+.study-notification { border-left: 3px solid var(--ds-brand-primary); }
+.study-notification.is-read { border-left-color: var(--ds-border-subtle); }
+.study-notification h2 { font-size: 18px; margin: 10px 0; }
+.study-notification p { overflow-wrap: anywhere; line-height: 1.7; }
+.study-notification .ds-actions { flex-wrap: wrap; }
+.ds-scope .as-lesson > .ds-btn { grid-column: 2 / -1; justify-self: start; }

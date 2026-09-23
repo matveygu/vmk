@@ -3,6 +3,7 @@
 {% block title %}Удаление предмета — ВМК МГУ{% endblock %}
 {% block extra_css %}{{ block.super }}<link rel="stylesheet" href="{% static 'css/ds/admin_schedule.css' %}">{% endblock %}
 {% block admin_content %}
+{% if change_count %}<p class="ds-alert ds-alert-info">Предмет используется в изменениях на даты: {{ change_count }}. Сначала измените эти записи.</p>{% endif %}
 <div class="ds-page-header ws-page-header"><div><span class="ds-eyebrow">Справочник предметов</span><h1>{% if used %}Предмет используется{% else %}Удалить предмет?{% endif %}</h1></div></div>
 <section class="ds-card as-confirm"><h2>{{ subject.name }}</h2><p>Занятий: {{ lesson_count }} · Домашних заданий: {{ homework_count }}</p>{% if used %}<div class="ds-alert ds-alert-info" role="status">Удаление недоступно: этот предмет связан с расписанием или домашними заданиями. Так учебные данные останутся сохранены.</div><a href="{{ subject_back_url }}" class="ds-btn ds-btn-secondary">К справочнику</a>{% else %}<p class="as-hint">Предмет не используется. Удаление нельзя отменить.</p><form method="post">{% csrf_token %}{% include 'admin_schedule_return_fields.html' %}<div class="ws-form-actions"><a href="{{ subject_back_url }}" class="ds-btn ds-btn-secondary">Отмена</a><button type="submit" class="ds-btn ds-btn-danger">Удалить предмет</button></div></form>{% endif %}</section>
 {% endblock %}

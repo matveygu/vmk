@@ -3,8 +3,15 @@ from django.contrib.auth import views as auth_views
 from . import views
 from . import admin_users, admin_groups, admin_schedule, people
 from . import email_auth
+from . import notifications
+from schedule import progress, change_views
 
 urlpatterns = [
+    path('notifications/', notifications.inbox, name='notifications'),
+    path('notifications/read-all/', notifications.mark_all_read, name='notifications_read_all'),
+    path('notifications/<int:pk>/read/', notifications.mark_read, name='notification_read'),
+    path('homework/<int:homework_id>/status/', progress.set_progress, name='homework_progress'),
+    path('admin-panel/schedule/<int:schedule_id>/change/', change_views.edit_change, name='lesson_change'),
     path('', views.home, name='home'),
     path('dpo/', views.programs_view, name='programs'),
     path('abiturientu/', views.abiturient_view, name='abiturient'),
